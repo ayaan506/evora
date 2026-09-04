@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Events & Experiences — Evora</title>
+    
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='images/E for evora.png') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='concerts.css') }}">
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="light-theme">
+
+    <!-- NAVIGATION BAR -->
+    <nav class="light-nav">
+        <a href="/" class="light-nav-logo" style="display: flex; align-items: center; gap: 10px; text-decoration: none;">
+            <div class="nav-logo-spacer" style="width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; overflow: visible;">
+                <img src="{{ url_for('static', filename='images/E for evora.png') }}" alt="Evora" class="nav-branded-logo-img" style="width: 100%; height: 100%; object-fit: contain; transform: scale(1.15);" onerror="this.style.display='none'">
+            </div>  
+            <span class="nav-logo-text" style="font-size: 24px; font-weight: 700;">evora</span>
+        </a>
+        <div class="light-nav-links">
+            <a href="/events"class="active" >Events</a>
+            <a href="/venues">Venues</a>
+            <a href="/manpower">Hire Staff</a>
+            <a href="/planner">Plan My Event</a>
+            <a href="/contact">Contact</a>
+            
+        </div>
+        <div class="light-nav-actions" id="nav-actions-logged-out">
+            <a href="/login" class="btn-light-login">Login</a>
+            <a href="/signup" class="btn-light-signup">Sign Up</a>
+        </div>
+        <div class="light-nav-actions" id="nav-actions-logged-in" style="display: none;">
+            <a href="/dashboard" class="btn-light-signup">
+                <i class="fa-solid fa-user"></i> My Dashboard
+            </a>
+        </div>
+    </nav>
+
+    <div class="light-container">
+        
+        <!-- SIDEBAR FILTERS -->
+        <aside class="light-sidebar">
+            <h3 class="sidebar-title">Filters</h3>
+
+            <div class="filter-card">
+                <div class="filter-header">
+                    <span><i class="fa-solid fa-chevron-up"></i> Categories</span>
+                    <button class="btn-clear" onclick="filterByCategory('all')">Show All</button>
+                </div>
+                <div class="chips-grid">
+                    <span class="filter-chip" data-cat="music" onclick="filterByCategory('music')">Music Shows</span>
+                    <span class="filter-chip" data-cat="comedy" onclick="filterByCategory('comedy')">Comedy Shows</span>
+                    <span class="filter-chip" data-cat="theatre" onclick="filterByCategory('theatre')">Theatre Shows</span>
+                    <span class="filter-chip" data-cat="workshops" onclick="filterByCategory('workshops')">Workshops</span>
+                    <span class="filter-chip" data-cat="interactive" onclick="filterByCategory('interactive')">Interactive Games</span>
+                    <span class="filter-chip" data-cat="adventure" onclick="filterByCategory('adventure')">Adventure & Fun</span>
+                    <span class="filter-chip" data-cat="amusement" onclick="filterByCategory('amusement')">Amusement Parks</span>
+                    <span class="filter-chip" data-cat="art" onclick="filterByCategory('art')">Art & Crafts</span>
+                </div>
+            </div>
+
+            <div class="filter-card">
+                <div class="filter-header">
+                    <span><i class="fa-solid fa-chevron-up"></i> Max Price</span>
+                </div>
+                <input type="range" class="light-slider" min="100" max="5000" value="5000" id="price-range" oninput="applyPriceFilter(this.value)">
+                <div class="slider-readout">Max Price: <span id="price-val">₹5000</span></div>
+            </div>
+        </aside>
+
+        <!-- MAIN EVENT CONTENT AREA -->
+        <main>
+            <div class="hub-header">
+                <h1 class="hub-title">Showing <span class="gradient-text" id="category-display-name">All Experiences</span></h1>
+                <span class="count-badge" id="event-count-badge">0 Events Available</span>
+            </div>
+
+            <!-- LIVE SEARCH BAR -->
+            <div class="hub-search-container">
+                <div class="search-input-wrap">
+                    <i class="fa-solid fa-magnifying-glass search-icon"></i>
+                    <input type="text" id="hub-search-input" class="hub-search-input" placeholder="Search by artist, show name, or venue..." oninput="handleSearchInput()">
+                    <button class="btn-clear-search" id="btn-clear-search" onclick="clearSearchInput()"><i class="fa-solid fa-circle-xmark"></i></button>
+                </div>
+            </div>
+
+            <!-- TOP HORIZONTAL CATEGORY SCROLLER -->
+            <div class="top-scroller">
+                <button class="top-scroller-chip active" data-cat="all" onclick="filterByCategory('all')">All Events</button>
+                <button class="top-scroller-chip" data-cat="music" onclick="filterByCategory('music')">Music Shows</button>
+                <button class="top-scroller-chip" data-cat="comedy" onclick="filterByCategory('comedy')">Comedy Shows</button>
+                <button class="top-scroller-chip" data-cat="theatre" onclick="filterByCategory('theatre')">Theatre</button>
+                <button class="top-scroller-chip" data-cat="workshops" onclick="filterByCategory('workshops')">Workshops</button>
+                <button class="top-scroller-chip" data-cat="interactive" onclick="filterByCategory('interactive')">Interactive Games</button>
+                <button class="top-scroller-chip" data-cat="adventure" onclick="filterByCategory('adventure')">Adventure</button>
+                <button class="top-scroller-chip" data-cat="amusement" onclick="filterByCategory('amusement')">Amusement Parks</button>
+                <button class="top-scroller-chip" data-cat="art" onclick="filterByCategory('art')">Art & Crafts</button>
+            </div>
+
+            <!-- CARDS GRID -->
+            <div class="events-grid" id="events-grid-container"></div>
+        </main>
+    </div>
+
+<!-- MODAL POPUP FOR HOSTING EVENTS (DEVICE UPLOAD ENABLED) -->
+    <div class="modal-overlay" id="add-event-modal">
+        <div class="modal-container" style="max-width: 500px; border-radius: 18px; padding: 24px;">
+            <div class="modal-header" style="border-bottom: 1px solid #f1f5f9; padding-bottom: 12px; margin-bottom: 16px;">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <div style="width: 36px; height: 36px; border-radius: 10px; background: #ede9fe; color: #7c3aed; display: flex; align-items: center; justify-content: center; font-size: 16px;">
+                        <i class="fa-solid fa-bullhorn"></i>
+                    </div>
+                    <div>
+                        <h3 style="margin: 0; font-size: 17px; font-weight: 700; color: #0f172a;">Host Your Event</h3>
+                        <p style="margin: 0; font-size: 12px; color: #64748b;">List your experience on Evora's live feed</p>
+                    </div>
+                </div>
+                <button class="btn-close-modal" onclick="closeModal()"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+
+            <form id="add-event-form" onsubmit="submitNewEvent(event)">
+                
+                <!-- DEVICE IMAGE UPLOAD DROPZONE -->
+                <div class="form-group" style="margin-bottom: 14px;">
+                    <label style="display:block; font-size: 12px; font-weight: 600; color: #334155; margin-bottom: 4px;">
+                        Event Poster Image
+                    </label>
+                    
+                    <div id="dropzone-box" onclick="document.getElementById('poster-file-input').click()" 
+                         style="border: 2px dashed #cbd5e1; border-radius: 12px; padding: 18px; text-align: center; background: #f8fafc; cursor: pointer; transition: all 0.2s ease;">
+                        
+                        <input type="file" id="poster-file-input" accept="image/*" style="display: none;" onchange="handleImageSelect(event)">
+                        
+                        <div id="upload-prompt-view">
+                            <i class="fa-solid fa-cloud-arrow-up" style="font-size: 28px; color: #7c3aed; margin-bottom: 6px;"></i>
+                            <p style="margin: 0; font-size: 13px; font-weight: 600; color: #0f172a;">Click to browse from device</p>
+                            <p style="margin: 2px 0 0 0; font-size: 11px; color: #94a3b8;">PNG, JPG, JPEG, WEBP</p>
+                        </div>
+
+                        <!-- Instant Image Preview Box -->
+                        <div id="upload-preview-view" style="display: none; position: relative;">
+                            <img id="preview-img-tag" src="" alt="Poster Preview" style="width: 100%; height: 160px; object-fit: cover; border-radius: 8px;">
+                            <div style="position: absolute; top: 8px; right: 8px; background: rgba(15, 23, 42, 0.75); color: #fff; font-size: 11px; padding: 3px 10px; border-radius: 20px; backdrop-filter: blur(4px);">
+                                <i class="fa-solid fa-arrows-rotate"></i> Change
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- EVENT NAME & CATEGORY -->
+                <div style="display: grid; grid-template-columns: 1.2fr 1fr; gap: 10px; margin-bottom: 12px;">
+                    <div class="form-group">
+                        <label style="display:block; font-size: 12px; font-weight: 600; color: #334155; margin-bottom: 4px;">Event Name</label>
+                        <input type="text" id="new-title" class="form-input" placeholder="e.g. Bassdrop Arena Night" required>
+                    </div>
+                    <div class="form-group">
+                        <label style="display:block; font-size: 12px; font-weight: 600; color: #334155; margin-bottom: 4px;">Category</label>
+                        <select id="new-cat" class="form-input" required>
+                            <option value="music">Music Shows</option>
+                            <option value="comedy">Comedy Shows</option>
+                            <option value="theatre">Theatre Shows</option>
+                            <option value="workshops">Workshops</option>
+                            <option value="interactive">Interactive Games</option>
+                            <option value="adventure">Adventure & Fun</option>
+                            <option value="amusement">Amusement Parks</option>
+                            <option value="art">Art & Crafts</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- VENUE & DATE -->
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px;">
+                    <div class="form-group">
+                        <label style="display:block; font-size: 12px; font-weight: 600; color: #334155; margin-bottom: 4px;">Venue / City</label>
+                        <input type="text" id="new-venue" class="form-input" placeholder="e.g. Balewadi Arena: Pune" required>
+                    </div>
+                    <div class="form-group">
+                        <label style="display:block; font-size: 12px; font-weight: 600; color: #334155; margin-bottom: 4px;">Date / Timing</label>
+                        <input type="text" id="new-date" class="form-input" placeholder="e.g. Sat, 28 Nov" required>
+                    </div>
+                </div>
+
+                <!-- TICKET PRICE -->
+                <div class="form-group" style="margin-bottom: 14px;">
+                    <label style="display:block; font-size: 12px; font-weight: 600; color: #334155; margin-bottom: 4px;">Ticket Starting Price (₹)</label>
+                    <input type="number" id="new-price" class="form-input" placeholder="e.g. 499" min="0" required>
+                </div>
+
+                <!-- NOTICE BANNER -->
+                <div style="background: #ecfdf5; border: 1px solid #a7f3d0; border-radius: 8px; padding: 10px 12px; margin-bottom: 16px; display: flex; align-items: center; gap: 8px;">
+                    <i class="fa-solid fa-circle-check" style="color: #059669;"></i>
+                    <span style="font-size: 11px; color: #065f46; font-weight: 600;">Sample Publishing: Event will appear live on your hub immediately.</span>
+                </div>
+
+                <button type="submit" id="btn-publish-event" class="btn-book" style="width: 100%; border: none; padding: 12px; font-size: 13px; font-weight: 700; cursor: pointer;">
+                    Publish Event Live →
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- SCRIPT LINKING & COMPLETE CONTROLLER -->
+    <script src="{{ url_for('static', filename='eventsData.js') }}"></script>
+    <script>
+        let currentCategory = 'all';
+        let currentMaxPrice = 5000;
+        let selectedImageFile = null;
+
+        function renderCards(dataset) {
+            const container = document.getElementById('events-grid-container');
+            container.innerHTML = '';
+
+            // EMPTY STATE FALLBACK UI
+            if (dataset.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state-card">
+                        <div class="empty-state-icon"><i class="fa-solid fa-magnifying-glass"></i></div>
+                        <h3 class="empty-state-title">No Matching Events Found</h3>
+                        <p class="empty-state-sub">We couldn't find any experiences matching your current search criteria or price range.</p>
+                        <button class="btn-reset-filters" onclick="resetAllFilters()">Reset All Filters <i class="fa-solid fa-rotate-right"></i></button>
+                    </div>
+                `;
+                document.getElementById('event-count-badge').innerText = `0 Events Available`;
+                return;
+            }
+
+            // RENDER MATCHING CARDS
+            dataset.forEach(item => {
+                const card = document.createElement('div');
+                card.className = 'event-card';
+                card.innerHTML = `
+                    <div class="card-media">
+                        <img src="${item.img}" alt="${item.title}">
+                        ${item.banner ? `<span class="card-banner">${item.banner}</span>` : ''}
+                        <div class="card-date">${item.date}</div>
+                    </div>
+                    <div class="card-body">
+                        <h3 class="card-title">${item.title}</h3>
+                        <p class="card-venue">${item.venue}</p>
+                        <p class="card-price">₹ ${item.price} onwards</p>
+                        <a href="/event-detail?id=${item.id}" class="btn-book">Book Passes</a>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+
+            // APPEND "ADD EVENT" CARD AT THE END
+            const addCard = document.createElement('div');
+            addCard.className = 'add-event-card';
+            addCard.onclick = openModal;
+            addCard.innerHTML = `
+                <div class="add-event-icon"><i class="fa-solid fa-plus"></i></div>
+                <h4 class="add-event-title">Host Your Event</h4>
+                <p class="add-event-sub">List your show, game, or workshop on Evora</p>
+            `;
+            container.appendChild(addCard);
+
+            document.getElementById('event-count-badge').innerText = `${dataset.length} Events Available`;
+        }
+
+        // FILTER FUNCTIONS
+        function filterByCategory(categoryKey) {
+            currentCategory = categoryKey;
+            document.querySelectorAll('.filter-chip, .top-scroller-chip').forEach(chip => {
+                chip.classList.toggle('active', chip.getAttribute('data-cat') === categoryKey);
+            });
+            applyCombinedFilters();
+        }
+
+        function applyPriceFilter(val) {
+            currentMaxPrice = parseInt(val);
+            document.getElementById('price-val').innerText = `₹${val}`;
+            applyCombinedFilters();
+        }
+
+        function handleSearchInput() {
+            const query = document.getElementById('hub-search-input').value.trim();
+            const clearBtn = document.getElementById('btn-clear-search');
+            clearBtn.style.display = query.length > 0 ? 'block' : 'none';
+            applyCombinedFilters();
+        }
+
+        function clearSearchInput() {
+            document.getElementById('hub-search-input').value = '';
+            document.getElementById('btn-clear-search').style.display = 'none';
+            applyCombinedFilters();
+        }
+
+        function applyCombinedFilters() {
+            const searchQuery = document.getElementById('hub-search-input').value.toLowerCase().trim();
+
+            const filtered = eventsDatabase.filter(e => {
+                const matchCat = (currentCategory === 'all') || (e.cat === currentCategory);
+                const matchPrice = e.price <= currentMaxPrice;
+                const matchSearch = searchQuery === '' || 
+                    e.title.toLowerCase().includes(searchQuery) || 
+                    e.venue.toLowerCase().includes(searchQuery) || 
+                    e.cat.toLowerCase().includes(searchQuery);
+
+                return matchCat && matchPrice && matchSearch;
+            });
+
+            renderCards(filtered);
+        }
+
+        function resetAllFilters() {
+            document.getElementById('hub-search-input').value = '';
+            document.getElementById('btn-clear-search').style.display = 'none';
+            document.getElementById('price-range').value = 5000;
+            document.getElementById('price-val').innerText = '₹5000';
+            currentMaxPrice = 5000;
+            filterByCategory('all');
+        }
+
+        // DEVICE FILE SELECTION & PREVIEW
+        function handleImageSelect(event) {
+            const file = event.target.files[0];
+            if (file) {
+                selectedImageFile = file;
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    document.getElementById('preview-img-tag').src = e.target.result;
+                    document.getElementById('upload-prompt-view').style.display = 'none';
+                    document.getElementById('upload-preview-view').style.display = 'block';
+                    document.getElementById('dropzone-box').style.borderColor = '#7c3aed';
+                    document.getElementById('dropzone-box').style.padding = '8px';
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        // MODAL HANDLERS
+        function openModal() {
+            document.getElementById('add-event-modal').classList.add('active');
+        }
+
+        function closeModal() {
+            document.getElementById('add-event-modal').classList.remove('active');
+            document.getElementById('add-event-form').reset();
+            selectedImageFile = null;
+            document.getElementById('upload-prompt-view').style.display = 'block';
+            document.getElementById('upload-preview-view').style.display = 'none';
+            document.getElementById('dropzone-box').style.borderColor = '#cbd5e1';
+            document.getElementById('dropzone-box').style.padding = '18px';
+        }
+
+        // SUBMIT & PUBLISH HANDLER (SYNC WITH BACKEND & LOCAL FEED)
+        async function submitNewEvent(e) {
+            e.preventDefault();
+
+            const title = document.getElementById('new-title').value.trim();
+            const cat = document.getElementById('new-cat').value;
+            const venue = document.getElementById('new-venue').value.trim();
+            const date = document.getElementById('new-date').value.trim();
+            const price = parseInt(document.getElementById('new-price').value) || 499;
+
+            const publishBtn = document.getElementById('btn-publish-event');
+            publishBtn.disabled = true;
+            publishBtn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Publishing...`;
+
+            const formData = new FormData();
+            formData.append('title', title);
+            formData.append('cat', cat);
+            formData.append('venue', venue);
+            formData.append('date', date);
+            formData.append('price', price);
+
+            if (selectedImageFile) {
+                formData.append('poster_image', selectedImageFile);
+            }
+
+            try {
+                const res = await fetch('/api/events/host-event', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await res.json();
+                let newImgUrl = "https://images.unsplash.com/photo-1501281668745-f7f57925c3b4?auto=format&fit=crop&w=600&q=80";
+
+                if (res.ok && data.status === 'success') {
+                    newImgUrl = data.event.img;
+                } else if (selectedImageFile) {
+                    newImgUrl = document.getElementById('preview-img-tag').src;
+                }
+
+                const newEventObj = {
+                    id: eventsDatabase.length + 100,
+                    cat: cat,
+                    title: title,
+                    venue: venue,
+                    date: date,
+                    price: price,
+                    banner: 'NEW HOST',
+                    img: newImgUrl
+                };
+
+                eventsDatabase.unshift(newEventObj);
+
+                alert(`🎉 Event Live!\n\n"${title}" has been successfully added to your active feed.`);
+                closeModal();
+                filterByCategory(cat);
+
+            } catch (err) {
+                const localPreview = document.getElementById('preview-img-tag').src || "https://images.unsplash.com/photo-1501281668745-f7f57925c3b4?auto=format&fit=crop&w=600&q=80";
+                eventsDatabase.unshift({
+                    id: eventsDatabase.length + 100,
+                    cat: cat,
+                    title: title,
+                    venue: venue,
+                    date: date,
+                    price: price,
+                    banner: 'NEW HOST',
+                    img: localPreview
+                });
+
+                alert(`🎉 Event Live!\n\n"${title}" has been added to your feed.`);
+                closeModal();
+                filterByCategory(cat);
+            } finally {
+                publishBtn.disabled = false;
+                publishBtn.innerHTML = `Publish Event Live →`;
+            }
+        }
+
+        // INITIAL LOAD & AUTH NAV STATE
+        window.addEventListener('DOMContentLoaded', () => {
+            const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
+            const loggedOutNav = document.getElementById('nav-actions-logged-out');
+            const loggedInNav = document.getElementById('nav-actions-logged-in');
+
+            if (isLoggedIn) {
+                if (loggedOutNav) loggedOutNav.style.display = 'none';
+                if (loggedInNav) loggedInNav.style.display = 'flex';
+            }
+
+            const selectedCat = new URLSearchParams(window.location.search).get('category') || 'all';
+            filterByCategory(selectedCat);
+        });
+    </script>
+</body>
+</html>

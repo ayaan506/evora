@@ -1,0 +1,964 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Book Halls & Grounds — Evora</title>
+    
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='images/E for evora.png') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='concerts.css') }}">
+    
+    <!-- Flatpickr Modern Calendar Stylesheet & Theme -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <link rel="stylesheet" href="https://npmcdn.com/flatpickr/dist/themes/airbnb.css">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        .venues-grid-layout {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 24px;
+            margin-top: 24px;
+        }
+
+        .venue-card {
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 16px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .venue-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 24px -6px rgba(0, 0, 0, 0.08);
+        }
+
+        /* Image Carousel Box */
+        .venue-slider-box {
+            position: relative;
+            width: 100%;
+            height: 200px;
+            overflow: hidden;
+            background: #f1f5f9;
+        }
+
+        .venue-slider-box img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: none;
+        }
+
+        .venue-slider-box img.active {
+            display: block;
+        }
+
+        .slider-btn {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(15, 23, 42, 0.6);
+            color: #ffffff;
+            border: none;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            cursor: pointer;
+            z-index: 5;
+            transition: background 0.2s;
+        }
+
+        .slider-btn:hover { background: rgba(124, 58, 237, 0.9); }
+        .slider-btn.prev { left: 8px; }
+        .slider-btn.next { right: 8px; }
+
+        .slider-dots {
+            position: absolute;
+            bottom: 8px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 4px;
+            z-index: 5;
+        }
+
+        .dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.5);
+        }
+
+        .dot.active {
+            background: #ffffff;
+            width: 14px;
+            border-radius: 100px;
+        }
+
+        .venue-tag-badge {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: linear-gradient(135deg, #7c3aed, #db2777);
+            color: #ffffff;
+            font-size: 9px;
+            font-weight: 700;
+            padding: 4px 10px;
+            border-radius: 4px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            z-index: 4;
+        }
+
+        .venue-body {
+            padding: 18px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            flex-grow: 1;
+        }
+
+        .venue-name {
+            font-size: 16px;
+            font-weight: 700;
+            color: #0f172a;
+            margin: 0;
+        }
+
+        .venue-location {
+            font-size: 12px;
+            color: #64748b;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .venue-location i { color: #7c3aed; }
+
+        .venue-features-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin: 10px 0;
+        }
+
+        .feature-tag {
+            background: #f1f5f9;
+            color: #475569;
+            font-size: 10px;
+            font-weight: 600;
+            padding: 3px 8px;
+            border-radius: 4px;
+        }
+
+        .venue-pricing-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-top: 12px;
+            margin-top: auto;
+            border-top: 1px solid #f1f5f9;
+        }
+
+        .rental-price {
+            font-size: 15px;
+            font-weight: 700;
+            color: #7c3aed;
+        }
+
+        .rental-price span {
+            font-size: 11px;
+            color: #64748b;
+            font-weight: 400;
+        }
+
+        .btn-rent-venue {
+            background: linear-gradient(135deg, #7c3aed, #db2777);
+            color: #ffffff;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+
+        .btn-rent-venue:hover { opacity: 0.95; }
+
+        /* CALENDAR & SHIFT INDICATORS */
+        .flatpickr-calendar {
+            font-family: 'Poppins', sans-serif !important;
+            border-radius: 14px !important;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15) !important;
+            border: 1px solid #e2e8f0 !important;
+        }
+        .flatpickr-day.selected {
+            background: #7c3aed !important;
+            border-color: #7c3aed !important;
+        }
+        .flatpickr-day.flatpickr-disabled {
+            color: #cbd5e1 !important;
+            background: #f8fafc !important;
+            text-decoration: line-through;
+            cursor: not-allowed !important;
+        }
+        .flatpickr-day.partial-lock {
+            background: #fef3c7 !important;
+            color: #d97706 !important;
+            border-radius: 50%;
+            font-weight: 700;
+        }
+
+        .shift-status-banner {
+            border-radius: 8px;
+            padding: 10px 12px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-bottom: 12px;
+            display: none;
+            align-items: center;
+            gap: 8px;
+        }
+        .banner-green { background: #ecfdf5; color: #059669; border: 1px solid #a7f3d0; }
+        .banner-yellow { background: #fffbeb; color: #d97706; border: 1px solid #fde68a; }
+        .banner-red { background: #fef2f2; color: #dc2626; border: 1px solid #fecaca; }
+
+        @media (max-width: 992px) { .venues-grid-layout { grid-template-columns: repeat(2, 1fr); } }
+        @media (max-width: 600px) { .venues-grid-layout { grid-template-columns: 1fr; } }
+    </style>
+</head>
+<body class="light-theme">
+
+    <!-- NAVIGATION BAR -->
+    <nav class="light-nav">
+        <a href="/" class="nav-logo-group" style="display: flex; align-items: center; gap: 10px; text-decoration: none;">
+            <div class="nav-logo-spacer" style="width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; overflow: visible;">
+                <img src="{{ url_for('static', filename='images/E for evora.png') }}" alt="Evora" class="nav-branded-logo-img" style="width: 100%; height: 100%; object-fit: contain; transform: scale(1.15);" onerror="this.style.display='none'">
+            </div>  
+            <span class="nav-logo-text" style="font-size: 24px; font-weight: 700;">evora</span>
+        </a>
+        <div class="light-nav-links">
+            <a href="/events">Events</a>
+            <a href="/venues" class="active">Venues</a>
+            <a href="/manpower">Hire Staff</a>
+            <a href="/planner">Plan My Event</a>
+            <a href="/contact">Contact</a>
+        </div>
+        <div class="light-nav-actions" id="nav-actions-logged-out">
+            <a href="/login" class="btn-light-login">Login</a>
+            <a href="/signup" class="btn-light-signup">Sign Up</a>
+        </div>
+        <div class="light-nav-actions" id="nav-actions-logged-in" style="display: none;">
+            <a href="/dashboard" class="btn-light-signup">
+                <i class="fa-solid fa-user"></i> My Dashboard
+            </a>
+        </div>
+    </nav>
+
+    <!-- MAIN CONTAINER -->
+    <main style="max-width: 1200px; margin: 90px auto 60px auto; padding: 0 24px;">
+        
+        <div class="hub-header" style="flex-direction: column; align-items: flex-start; gap: 6px;">
+            <h1 class="hub-title">Book Halls, Lawns & <span class="gradient-text">Event Grounds</span></h1>
+            <p style="margin: 0; color: #64748b; font-size: 14px;">Reserve memorial halls, AC auditoriums, banquet lawns, and open exhibition grounds for private functions & shows.</p>
+        </div>
+
+        <!-- TOP SCROLLER CATEGORY CHIPS -->
+        <div class="top-scroller" style="margin-top: 18px;">
+            <button class="top-scroller-chip active" onclick="filterVenues('all', this)">All Venues (20)</button>
+            <button class="top-scroller-chip" onclick="filterVenues('hall', this)">Memorial & Cultural Halls</button>
+            <button class="top-scroller-chip" onclick="filterVenues('auditorium', this)">AC Auditoriums</button>
+            <button class="top-scroller-chip" onclick="filterVenues('lawn', this)">Banquet Lawns</button>
+            <button class="top-scroller-chip" onclick="filterVenues('ground', this)">Exhibition Grounds</button>
+        </div>
+
+        <!-- VENUES GRID -->
+        <div class="venues-grid-layout" id="venues-grid-container">
+            <!-- JavaScript renders 20 venue cards -->
+        </div>
+
+    </main>
+
+    <!-- VENUE RENTAL BOOKING MODAL -->
+    <div class="modal-overlay" id="venue-booking-modal">
+        <div class="modal-container">
+            <div class="modal-header">
+                <h3 id="modal-venue-title">Rent Venue</h3>
+                <button class="btn-close-modal" onclick="closeVenueModal()"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+
+            <form onsubmit="submitVenueBooking(event)">
+                <div class="form-group">
+                    <label>Event Type / Purpose</label>
+                    <select id="venue-purpose" class="form-input" required>
+                        <option value="">Select Purpose</option>
+                        <option value="wedding">Wedding / Reception</option>
+                        <option value="cultural">Live Cultural Show / Concert</option>
+                        <option value="corporate">Corporate Conference / Seminar</option>
+                        <option value="exhibition">Exhibition / Trade Fair</option>
+                        <option value="party">Private Party / Celebration</option>
+                    </select>
+                </div>
+
+                <!-- DATEPICKER WITH REAL-TIME CALENDAR LOCK -->
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                    <div class="form-group">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2px;">
+                            <label>Booking Date</label>
+                            <span id="calendar-loading" style="font-size: 10px; color: #7c3aed; display: none;"><i class="fa-solid fa-spinner fa-spin"></i> Checking...</span>
+                        </div>
+                        <input type="text" id="venue-datepicker" class="form-input" placeholder="Select date..." required readonly style="background:#fff; cursor:pointer;">
+                    </div>
+                    <div class="form-group">
+                        <label>Shift / Duration</label>
+                        <select class="form-input" id="shift-type" onchange="handleShiftChange()" required>
+                            <option value="2" data-shift="FULL_DAY" selected>Full Day Shift (8 Hours)</option>
+                            <option value="1" data-shift="MORNING">Half Day / Morning (4 Hours)</option>
+                            <option value="1" data-shift="EVENING">Night / Evening Shift</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- AVAILABILITY NOTIFICATION BANNER -->
+                <div id="shift-status-banner" class="shift-status-banner"></div>
+
+                <div class="form-group">
+                    <label>Expected Guest Count</label>
+                    <input type="number" class="form-input" id="venue-guest-count" placeholder="e.g., 500 Guests" required>
+                </div>
+
+                <!-- PRICING SUMMARY -->
+                <div class="payment-box">
+                    <div class="payment-summary">
+                        <span>Daily Rental Rate</span>
+                        <span id="summary-daily-rate">₹ 45,000</span>
+                    </div>
+                    <div class="payment-summary" style="font-size:11px; color:#64748b;">
+                        <span>Refundable Security Deposit</span>
+                        <span>₹ 10,000</span>
+                    </div>
+                    <div class="payment-summary" style="font-size:11px; color:#64748b;">
+                        <span>Cleaning & Maintenance Charge</span>
+                        <span>₹ 2,500</span>
+                    </div>
+                    <hr style="border:none; border-top:1px solid #e2e8f0; margin:8px 0;">
+                    <div class="payment-summary" style="font-size:15px; color:#7c3aed;">
+                        <span>Estimated Venue Rent</span>
+                        <span id="summary-total-rental">₹ 57,500</span>
+                    </div>
+                </div>
+
+                <div style="background:#eff6ff; border:1px solid #bfdbfe; border-radius:10px; padding:10px 14px; margin-bottom:16px; font-size:12px; color:#1e40af; display:flex; align-items:center; gap:8px;">
+                    <i class="fa-solid fa-circle-info"></i>
+                    <span>Zero upfront charge. The admin desk reviews and allocates the slot before payment unlocks.</span>
+                </div>
+
+                <button type="submit" id="btn-submit-venue-req" class="btn-pay-submit">Submit Reservation Request</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Flatpickr Core JS -->
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+
+    <script>
+        // MASTER DATABASE: 20 HALLS, LAWNS & GROUNDS FOR RENT
+        const venuesDatabase = [
+            {
+                id: 1,
+                name: "Jawaharlal Nehru Memorial Hall",
+                city: "Pune",
+                type: "hall",
+                location: "Camp, Pune",
+                capacity: "1,200 Capacity",
+                price: 45000,
+                tags: ["AC Hall", "Stage Lighting", "Green Rooms", "Sound System"],
+                images: [
+                    "https://images.unsplash.com/photo-1519167758481-83f550bb49b3?auto=format&fit=crop&w=600&q=80",
+                    "https://images.unsplash.com/photo-1460723237483-7a6dc9d0b212?auto=format&fit=crop&w=600&q=80",
+                    "https://images.unsplash.com/photo-1507676184212-d03ab07a01bf?auto=format&fit=crop&w=600&q=80"
+                ]
+            },
+            {
+                id: 2,
+                name: "Bal Gandharva Cultural Hall",
+                city: "Pune",
+                type: "hall",
+                location: "JM Road, Shivajinagar, Pune",
+                capacity: "1,000 Seats",
+                price: 50000,
+                tags: ["Cultural Hall", "Balcony Seating", "Central AC"],
+                images: [
+                    "https://images.unsplash.com/photo-1507676184212-d03ab07a01bf?auto=format&fit=crop&w=600&q=80",
+                    "https://images.unsplash.com/photo-1460723237483-7a6dc9d0b212?auto=format&fit=crop&w=600&q=80",
+                    "https://images.unsplash.com/photo-1583795128727-6ec3642408f8?auto=format&fit=crop&w=600&q=80"
+                ]
+            },
+            {
+                id: 3,
+                name: "Yashwantrao Chavan Memorial Hall",
+                city: "Pune",
+                type: "auditorium",
+                location: "Kothrud, Pune",
+                capacity: "900 Seats",
+                price: 38000,
+                tags: ["Proscenium Stage", "Acoustic Walls", "Parking Space"],
+                images: [
+                    "https://images.unsplash.com/photo-1583795128727-6ec3642408f8?auto=format&fit=crop&w=600&q=80",
+                    "https://images.unsplash.com/photo-1507676184212-d03ab07a01bf?auto=format&fit=crop&w=600&q=80",
+                    "https://images.unsplash.com/photo-1585699324551-f6c309eedeca?auto=format&fit=crop&w=600&q=80"
+                ]
+            },
+            {
+                id: 4,
+                name: "Royal Palace Banquet Lawn",
+                city: "Pune",
+                type: "lawn",
+                location: "Bibwewadi, Pune",
+                capacity: "2,500 Guests",
+                price: 75000,
+                tags: ["Open Air Lawn", "Dining Canopy", "Decorator Included"],
+                images: [
+                    "https://images.unsplash.com/photo-1519167758481-83f550bb49b3?auto=format&fit=crop&w=600&q=80",
+                    "https://images.unsplash.com/photo-1511795409834-ef04bbd61622?auto=format&fit=crop&w=600&q=80",
+                    "https://images.unsplash.com/photo-1465495976277-4387d4b0b4c6?auto=format&fit=crop&w=600&q=80"
+                ]
+            },
+            {
+                id: 5,
+                name: "Teerth Exhibition Grounds",
+                city: "Pune",
+                type: "ground",
+                location: "Sus, Pune",
+                capacity: "15,000 Capacity",
+                price: 120000,
+                tags: ["Mega Outdoor Ground", "Trade Fairs", "Heavy Power Supply"],
+                images: [
+                    "https://images.unsplash.com/photo-1506157786151-b8491531f063?auto=format&fit=crop&w=600&q=80",
+                    "https://images.unsplash.com/photo-1504280390367-361c6d9f38f4?auto=format&fit=crop&w=600&q=80",
+                    "https://images.unsplash.com/photo-1508614589041-895b88991e3e?auto=format&fit=crop&w=600&q=80"
+                ]
+            },
+            {
+                id: 6,
+                name: "Dr. B.R. Ambedkar Memorial Hall",
+                city: "Pune",
+                type: "hall",
+                location: "Camp, Pune",
+                capacity: "800 Seats",
+                price: 30000,
+                tags: ["Seminar Hall", "Podium System", "Valet Parking"],
+                images: [
+                    "https://images.unsplash.com/photo-1478720568477-152d9b164e26?auto=format&fit=crop&w=600&q=80",
+                    "https://images.unsplash.com/photo-1503095396549-807759245b35?auto=format&fit=crop&w=600&q=80",
+                    "https://images.unsplash.com/photo-1514306191717-452ec28c7814?auto=format&fit=crop&w=600&q=80"
+                ]
+            },
+            {
+                id: 7,
+                name: "Tilak Smarak Mandir Hall",
+                city: "Pune",
+                type: "hall",
+                location: "Sadashiv Peth, Pune",
+                capacity: "1,000 Seats",
+                price: 40000,
+                tags: ["Historic Heritage Hall", "Drama Stage", "Sound Desk"],
+                images: [
+                    "https://images.unsplash.com/photo-1460723237483-7a6dc9d0b212?auto=format&fit=crop&w=600&q=80",
+                    "https://images.unsplash.com/photo-1507676184212-d03ab07a01bf?auto=format&fit=crop&w=600&q=80",
+                    "https://images.unsplash.com/photo-1583795128727-6ec3642408f8?auto=format&fit=crop&w=600&q=80"
+                ]
+            },
+            {
+                id: 8,
+                name: "Orchid Grand Convention Lawn",
+                city: "Pune",
+                type: "lawn",
+                location: "Baner, Pune",
+                capacity: "3,000 Guests",
+                price: 85000,
+                tags: ["Lawn + AC Hall", "Bridal Suites", "Catering Setup"],
+                images: [
+                    "https://images.unsplash.com/photo-1511795409834-ef04bbd61622?auto=format&fit=crop&w=600&q=80",
+                    "https://images.unsplash.com/photo-1519167758481-83f550bb49b3?auto=format&fit=crop&w=600&q=80",
+                    "https://images.unsplash.com/photo-1465495976277-4387d4b0b4c6?auto=format&fit=crop&w=600&q=80"
+                ]
+            },
+            {
+                id: 9,
+                name: "Ram Krishna More Auditorium",
+                city: "Pune",
+                type: "auditorium",
+                location: "Chinchwad, Pune",
+                capacity: "1,200 Seats",
+                price: 48000,
+                tags: ["Full AC", "Dual Balcony", "Green Room Lockers"],
+                images: [
+                    "https://images.unsplash.com/photo-1507676184212-d03ab07a01bf?auto=format&fit=crop&w=600&q=80",
+                    "https://images.unsplash.com/photo-1585699324551-f6c309eedeca?auto=format&fit=crop&w=600&q=80",
+                    "https://images.unsplash.com/photo-1460723237483-7a6dc9d0b212?auto=format&fit=crop&w=600&q=80"
+                ]
+            },
+            {
+                id: 10,
+                name: "St. Andrews Auditorium & Hall",
+                city: "Mumbai",
+                type: "auditorium",
+                location: "Bandra West, Mumbai",
+                capacity: "850 Seats",
+                price: 65000,
+                tags: ["Acoustic Sound", "AC Hall", "VIP Lounge"],
+                images: [
+                    "https://images.unsplash.com/photo-1478720568477-152d9b164e26?auto=format&fit=crop&w=600&q=80",
+                    "https://images.unsplash.com/photo-1503095396549-807759245b35?auto=format&fit=crop&w=600&q=80",
+                    "https://images.unsplash.com/photo-1514306191717-452ec28c7814?auto=format&fit=crop&w=600&q=80"
+                ]
+            },
+            {
+                id: 11,
+                name: "Deccan Gymkhana Assembly Hall",
+                city: "Pune",
+                type: "hall",
+                location: "Deccan, Pune",
+                capacity: "500 Guests",
+                price: 25000,
+                tags: ["Private Hall", "Dining Area", "Central Location"],
+                images: [
+                    "https://images.unsplash.com/photo-1519167758481-83f550bb49b3?auto=format&fit=crop&w=600&q=80",
+                    "https://images.unsplash.com/photo-1511795409834-ef04bbd61622?auto=format&fit=crop&w=600&q=80",
+                    "https://images.unsplash.com/photo-1507676184212-d03ab07a01bf?auto=format&fit=crop&w=600&q=80"
+                ]
+            },
+            {
+                id: 12,
+                name: "Aundh Cultural Lawn & Hall",
+                city: "Pune",
+                type: "lawn",
+                location: "Aundh, Pune",
+                capacity: "1,500 Guests",
+                price: 55000,
+                tags: ["Green Lawn", "AC Banquet Hall", "Kitchen Space"],
+                images: [
+                    "https://images.unsplash.com/photo-1511795409834-ef04bbd61622?auto=format&fit=crop&w=600&q=80",
+                    "https://images.unsplash.com/photo-1465495976277-4387d4b0b4c6?auto=format&fit=crop&w=600&q=80",
+                    "https://images.unsplash.com/photo-1519167758481-83f550bb49b3?auto=format&fit=crop&w=600&q=80"
+                ]
+            },
+            {
+                id: 13,
+                name: "Jio World Garden & Lawns",
+                city: "Mumbai",
+                type: "ground",
+                location: "BKC, Mumbai",
+                capacity: "12,000 Capacity",
+                price: 250000,
+                tags: ["Luxury Open Lawn", "Corporate Galas", "Full Security"],
+                images: [
+                    "https://images.unsplash.com/photo-1506157786151-b8491531f063?auto=format&fit=crop&w=600&q=80",
+                    "https://images.unsplash.com/photo-1540039155733-5bb30b53aa14?auto=format&fit=crop&w=600&q=80",
+                    "https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?auto=format&fit=crop&w=600&q=80"
+                ]
+            },
+            {
+                id: 14,
+                name: "Siddharth Hall",
+                city: "Pune",
+                type: "hall",
+                location: "Karve Nagar, Pune",
+                capacity: "700 Guests",
+                price: 28000,
+                tags: ["Air Conditioned", "In-house Catering", "Stage Setup"],
+                images: [
+                    "https://images.unsplash.com/photo-1519167758481-83f550bb49b3?auto=format&fit=crop&w=600&q=80",
+                    "https://images.unsplash.com/photo-1507676184212-d03ab07a01bf?auto=format&fit=crop&w=600&q=80",
+                    "https://images.unsplash.com/photo-1583795128727-6ec3642408f8?auto=format&fit=crop&w=600&q=80"
+                ]
+            },
+            {
+                id: 15,
+                name: "Bhartiya Vidya Bhavan Hall",
+                city: "Pune",
+                type: "hall",
+                location: "Senapati Bapat Road, Pune",
+                capacity: "600 Seats",
+                price: 32000,
+                tags: ["Lecture & Cultural Hall", "Projector Screen", "Sound Desk"],
+                images: [
+                    "https://images.unsplash.com/photo-1583795128727-6ec3642408f8?auto=format&fit=crop&w=600&q=80",
+                    "https://images.unsplash.com/photo-1585699324551-f6c309eedeca?auto=format&fit=crop&w=600&q=80",
+                    "https://images.unsplash.com/photo-1460723237483-7a6dc9d0b212?auto=format&fit=crop&w=600&q=80"
+                ]
+            },
+            {
+                id: 16,
+                name: "NCPA Tata Theatre Hall",
+                city: "Mumbai",
+                type: "auditorium",
+                location: "Nariman Point, Mumbai",
+                capacity: "1,000 Seats",
+                price: 90000,
+                tags: ["Acoustic Masterpiece", "State-of-art Lighting", "VIP Lounge"],
+                images: [
+                    "https://images.unsplash.com/photo-1460723237483-7a6dc9d0b212?auto=format&fit=crop&w=600&q=80",
+                    "https://images.unsplash.com/photo-1503095396549-807759245b35?auto=format&fit=crop&w=600&q=80",
+                    "https://images.unsplash.com/photo-1514306191717-452ec28c7814?auto=format&fit=crop&w=600&q=80"
+                ]
+            },
+            {
+                id: 17,
+                name: "Mahalaxmi Pavilion Ground",
+                city: "Mumbai",
+                type: "ground",
+                location: "Mahalaxmi, Mumbai",
+                capacity: "20,000 Capacity",
+                price: 180000,
+                tags: ["Open Pavilion", "Concert Ground", "Multiple Gates"],
+                images: [
+                    "https://images.unsplash.com/photo-1506157786151-b8491531f063?auto=format&fit=crop&w=600&q=80",
+                    "https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?auto=format&fit=crop&w=600&q=80",
+                    "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?auto=format&fit=crop&w=600&q=80"
+                ]
+            },
+            {
+                id: 18,
+                name: "M.E.S. Abasaheb Garware Hall",
+                city: "Pune",
+                type: "hall",
+                location: "Karve Road, Pune",
+                capacity: "800 Seats",
+                price: 35000,
+                tags: ["College Auditorium", "Podium & Mic Setup", "Generator Backup"],
+                images: [
+                    "https://images.unsplash.com/photo-1507676184212-d03ab07a01bf?auto=format&fit=crop&w=600&q=80",
+                    "https://images.unsplash.com/photo-1583795128727-6ec3642408f8?auto=format&fit=crop&w=600&q=80",
+                    "https://images.unsplash.com/photo-1460723237483-7a6dc9d0b212?auto=format&fit=crop&w=600&q=80"
+                ]
+            },
+            {
+                id: 19,
+                name: "PIMPRI Chinchwad Exhibition Lawn",
+                city: "Pune",
+                type: "ground",
+                location: "PCMC, Pune",
+                capacity: "8,000 Guests",
+                price: 80000,
+                tags: ["Exhibition Center", "Large Parking", "PA System"],
+                images: [
+                    "https://images.unsplash.com/photo-1511795409834-ef04bbd61622?auto=format&fit=crop&w=600&q=80",
+                    "https://images.unsplash.com/photo-1506157786151-b8491531f063?auto=format&fit=crop&w=600&q=80",
+                    "https://images.unsplash.com/photo-1519167758481-83f550bb49b3?auto=format&fit=crop&w=600&q=80"
+                ]
+            },
+            {
+                id: 20,
+                name: "Yashada Auditorium & Convention Centre",
+                city: "Pune",
+                type: "auditorium",
+                location: "Baner Road, Pune",
+                capacity: "1,000 Seats",
+                price: 52000,
+                tags: ["Government Convention Hall", "High Security", "AC Dining Hall"],
+                images: [
+                    "https://images.unsplash.com/photo-1517299321531-3264a16e8e02?auto=format&fit=crop&w=600&q=80",
+                    "https://images.unsplash.com/photo-1507676184212-d03ab07a01bf?auto=format&fit=crop&w=600&q=80",
+                    "https://images.unsplash.com/photo-1583795128727-6ec3642408f8?auto=format&fit=crop&w=600&q=80"
+                ]
+            }
+        ];
+
+        // RENDER CARDS
+        function renderVenues(dataset) {
+            const container = document.getElementById('venues-grid-container');
+            container.innerHTML = '';
+
+            dataset.forEach(item => {
+                const card = document.createElement('div');
+                card.className = 'venue-card';
+
+                let imagesHTML = '';
+                let dotsHTML = '';
+                item.images.forEach((imgUrl, idx) => {
+                    const activeClass = idx === 0 ? 'active' : '';
+                    imagesHTML += `<img src="${imgUrl}" class="${activeClass}" id="vimg-${item.id}-${idx}" alt="${item.name}">`;
+                    dotsHTML += `<span class="dot ${activeClass}" id="vdot-${item.id}-${idx}"></span>`;
+                });
+
+                let tagsHTML = '';
+                item.tags.forEach(tag => {
+                    tagsHTML += `<span class="feature-tag">${tag}</span>`;
+                });
+
+                card.innerHTML = `
+                    <div class="venue-slider-box">
+                        <span class="venue-tag-badge">${item.city}</span>
+                        ${imagesHTML}
+                        <button class="slider-btn prev" onclick="slideVenueImage(${item.id}, -1)"><i class="fa-solid fa-chevron-left"></i></button>
+                        <button class="slider-btn next" onclick="slideVenueImage(${item.id}, 1)"><i class="fa-solid fa-chevron-right"></i></button>
+                        <div class="slider-dots">${dotsHTML}</div>
+                    </div>
+                    <div class="venue-body">
+                        <h3 class="venue-name">${item.name}</h3>
+                        <p class="venue-location"><i class="fa-solid fa-location-dot"></i> ${item.location} • <strong>${item.capacity}</strong></p>
+                        <div class="venue-features-list">${tagsHTML}</div>
+                        <div class="venue-pricing-row">
+                            <div class="rental-price">₹ ${item.price.toLocaleString()} <span>/ day</span></div>
+                            <button class="btn-rent-venue" onclick="openVenueModal('${item.name.replace(/'/g, "\\'")}', ${item.price})">Book Venue</button>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        // CAROUSEL LOGIC
+        const slideIndexState = {};
+
+        function slideVenueImage(venueId, direction) {
+            if (!(venueId in slideIndexState)) slideIndexState[venueId] = 0;
+
+            const venueObj = venuesDatabase.find(v => v.id === venueId);
+            const totalImgs = venueObj.images.length;
+
+            document.getElementById(`vimg-${venueId}-${slideIndexState[venueId]}`).classList.remove('active');
+            document.getElementById(`vdot-${venueId}-${slideIndexState[venueId]}`).classList.remove('active');
+
+            slideIndexState[venueId] += direction;
+            if (slideIndexState[venueId] < 0) slideIndexState[venueId] = totalImgs - 1;
+            if (slideIndexState[venueId] >= totalImgs) slideIndexState[venueId] = 0;
+
+            document.getElementById(`vimg-${venueId}-${slideIndexState[venueId]}`).classList.add('active');
+            document.getElementById(`vdot-${venueId}-${slideIndexState[venueId]}`).classList.add('active');
+        }
+
+        // FILTER CHIPS LOGIC
+        function filterVenues(type, btn) {
+            document.querySelectorAll('.top-scroller-chip').forEach(c => c.classList.remove('active'));
+            btn.classList.add('active');
+
+            if (type === 'all') {
+                renderVenues(venuesDatabase);
+            } else {
+                const filtered = venuesDatabase.filter(v => v.type === type);
+                renderVenues(filtered);
+            }
+        }
+
+        // MODAL & CALENDAR LOCK LOGIC
+        let selectedVenuePrice = 45000;
+        let selectedVenueName = '';
+        let flatpickrInstance = null;
+        let currentVenueAvailability = { fully_locked_dates: [], partially_locked_dates: {} };
+
+        async function openVenueModal(venueName, price) {
+            selectedVenuePrice = price;
+            selectedVenueName = venueName;
+            document.getElementById('modal-venue-title').innerText = `Rent ${venueName}`;
+            document.getElementById('summary-daily-rate').innerText = `₹ ${price.toLocaleString()}`;
+            
+            calculateRentalTotal();
+            document.getElementById('venue-booking-modal').classList.add('active');
+
+            // Fetch live booked schedule & initialize calendar lock
+            await initVenueCalendarLock(venueName);
+        }
+
+        function closeVenueModal() {
+            document.getElementById('venue-booking-modal').classList.remove('active');
+            if (flatpickrInstance) {
+                flatpickrInstance.clear();
+            }
+            hideShiftStatusBanner();
+        }
+
+        async function initVenueCalendarLock(venueName) {
+            const loader = document.getElementById('calendar-loading');
+            if (loader) loader.style.display = 'inline-block';
+
+            try {
+                const res = await fetch(`/api/venue-booked-dates?venue_name=${encodeURIComponent(venueName)}`);
+                const data = await res.json();
+                
+                if (res.ok && data.status === 'success') {
+                    currentVenueAvailability = data;
+                }
+            } catch (err) {
+                console.error("Failed to load venue schedule:", err);
+            } finally {
+                if (loader) loader.style.display = 'none';
+            }
+
+            if (flatpickrInstance) {
+                flatpickrInstance.destroy();
+            }
+
+            flatpickrInstance = flatpickr("#venue-datepicker", {
+                dateFormat: "Y-m-d",
+                minDate: "today",
+                disable: [
+                    function(date) {
+                        const dateStr = date.toISOString().split('T')[0];
+                        return currentVenueAvailability.fully_locked_dates.includes(dateStr);
+                    }
+                ],
+                onDayCreate: function(dObj, dStr, fp, dayElem) {
+                    const dateStr = dayElem.dateObj.toISOString().split('T')[0];
+                    if (currentVenueAvailability.partially_locked_dates[dateStr]) {
+                        dayElem.classList.add("partial-lock");
+                        dayElem.title = `Partial Shift Booked (${currentVenueAvailability.partially_locked_dates[dateStr]})`;
+                    }
+                },
+                onChange: function(selectedDates, dateStr) {
+                    inspectSelectedDateAvailability(dateStr);
+                }
+            });
+        }
+
+        function inspectSelectedDateAvailability(dateStr) {
+            const shiftSelect = document.getElementById('shift-type');
+            const fullDayOpt = shiftSelect.querySelector('option[data-shift="FULL_DAY"]');
+            const morningOpt = shiftSelect.querySelector('option[data-shift="MORNING"]');
+            const eveningOpt = shiftSelect.querySelector('option[data-shift="EVENING"]');
+
+            fullDayOpt.disabled = false;
+            morningOpt.disabled = false;
+            eveningOpt.disabled = false;
+
+            if (currentVenueAvailability.partially_locked_dates[dateStr]) {
+                const bookedShift = currentVenueAvailability.partially_locked_dates[dateStr];
+                fullDayOpt.disabled = true;
+                
+                if (bookedShift === 'MORNING') {
+                    morningOpt.disabled = true;
+                    eveningOpt.selected = true;
+                    showShiftStatusBanner('yellow', `<i class="fa-solid fa-triangle-exclamation"></i> Morning shift is taken on this date. <strong>Evening Gala Shift</strong> is available!`);
+                } else if (bookedShift === 'EVENING') {
+                    eveningOpt.disabled = true;
+                    morningOpt.selected = true;
+                    showShiftStatusBanner('yellow', `<i class="fa-solid fa-triangle-exclamation"></i> Evening shift is taken on this date. <strong>Morning Shift</strong> is available!`);
+                }
+            } else {
+                showShiftStatusBanner('green', `<i class="fa-solid fa-circle-check"></i> <strong>All shifts available</strong> on this date (Full Day, Morning, or Evening).`);
+            }
+
+            calculateRentalTotal();
+        }
+
+        function showShiftStatusBanner(type, html) {
+            const banner = document.getElementById('shift-status-banner');
+            banner.className = `shift-status-banner banner-${type}`;
+            banner.innerHTML = html;
+            banner.style.display = 'flex';
+        }
+
+        function hideShiftStatusBanner() {
+            document.getElementById('shift-status-banner').style.display = 'none';
+        }
+
+        function handleShiftChange() {
+            calculateRentalTotal();
+        }
+
+        function calculateRentalTotal() {
+            const multiplier = parseFloat(document.getElementById('shift-type').value);
+            const baseRental = selectedVenuePrice * (multiplier === 1 ? 0.6 : 1);
+            const deposit = 10000;
+            const cleaning = 2500;
+            const total = baseRental + deposit + cleaning;
+
+            document.getElementById('summary-total-rental').innerText = `₹ ${total.toLocaleString()}`;
+            return total;
+        }
+
+        async function submitVenueBooking(e) {
+            e.preventDefault();
+
+            // 1. Mandatory Authentication Check
+            const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
+            if (!isLoggedIn) {
+                alert("⚠️ Please log in to your Evora account before requesting a venue.");
+                window.location.href = '/login';
+                return;
+            }
+
+            const bookingDate = document.getElementById('venue-datepicker').value;
+            if (!bookingDate) {
+                alert("Please select a booking date from the calendar.");
+                return;
+            }
+
+            const purpose = document.getElementById('venue-purpose').value;
+            const shiftSelect = document.getElementById('shift-type');
+            const shiftText = shiftSelect.options[shiftSelect.selectedIndex].text;
+            const guestCount = document.getElementById('venue-guest-count').value;
+            const totalAmount = calculateRentalTotal();
+
+            const submitBtn = document.getElementById('btn-submit-venue-req');
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Submitting Request...`;
+
+            try {
+                // Submit allocation request without upfront charge
+                const res = await fetch('/api/venues/request-booking', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify({
+                        venue_name: selectedVenueName,
+                        booking_date: bookingDate,
+                        shift_type: shiftText,
+                        total_price: totalAmount,
+                        guest_count: guestCount ? `${guestCount} Guests` : 'Standard Crowd',
+                        notes: `Purpose: ${purpose.toUpperCase()}`
+                    })
+                });
+
+                const data = await res.json();
+
+                if (res.ok && data.status === 'success') {
+                    alert(`📋 Reservation Request Submitted!\n\nReference: ${data.booking_ref}\nVenue: ${selectedVenueName}\nDate: ${bookingDate}\n\nOur operations desk will review availability. You will receive an email confirmation once allocated to proceed with payment.`);
+                    closeVenueModal();
+                    window.location.href = '/dashboard';
+                } else if (res.status === 409) {
+                    alert(`⚠️ Slot Unavailable:\n${data.message}`);
+                    await initVenueCalendarLock(selectedVenueName);
+                } else {
+                    alert(data.message || "Failed to submit reservation request.");
+                }
+            } catch (err) {
+                alert("Connection error during reservation submission.");
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = `Submit Reservation Request`;
+            }
+        }
+
+        // NAVBAR AUTH CHECK & INITIAL LOAD
+        window.addEventListener('DOMContentLoaded', () => {
+            const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
+            const loggedOutNav = document.getElementById('nav-actions-logged-out');
+            const loggedInNav = document.getElementById('nav-actions-logged-in');
+
+            if (isLoggedIn) {
+                if (loggedOutNav) loggedOutNav.style.display = 'none';
+                if (loggedInNav) loggedInNav.style.display = 'flex';
+            }
+
+            renderVenues(venuesDatabase);
+        });
+    </script>
+</body>
+</html>

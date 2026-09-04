@@ -1,0 +1,849 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Operations & User Audits — Evora</title>
+    
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='images/E for evora.png') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='concerts.css') }}">
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        body {
+            background-color: #f8fafc;
+            color: #0f172a;
+            font-family: 'Poppins', sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+        .admin-nav {
+            background: #0f172a;
+            color: #ffffff;
+            padding: 14px 28px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        .admin-nav-brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-decoration: none;
+            color: #ffffff;
+            font-size: 20px;
+            font-weight: 700;
+        }
+        .admin-badge {
+            background: linear-gradient(135deg, #7c3aed, #db2777);
+            font-size: 10px;
+            padding: 4px 10px;
+            border-radius: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-weight: 700;
+        }
+        .admin-container {
+            max-width: 1400px;
+            margin: 28px auto 60px auto;
+            padding: 0 24px;
+        }
+
+        /* PRIMARY SECTION TABS */
+        .admin-main-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 24px;
+            border-bottom: 2px solid #e2e8f0;
+            padding-bottom: 12px;
+        }
+        .main-tab-btn {
+            background: #ffffff;
+            border: 1px solid #cbd5e1;
+            font-size: 14px;
+            font-weight: 600;
+            color: #475569;
+            padding: 10px 20px;
+            cursor: pointer;
+            border-radius: 10px;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .main-tab-btn:hover {
+            background: #f1f5f9;
+            color: #0f172a;
+        }
+        .main-tab-btn.active {
+            background: #7c3aed;
+            color: #ffffff;
+            border-color: #7c3aed;
+            box-shadow: 0 4px 14px rgba(124, 58, 237, 0.25);
+        }
+
+        /* KPI STATS ROW */
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+            margin-bottom: 28px;
+        }
+        .kpi-card {
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 14px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .kpi-title {
+            font-size: 12px;
+            color: #64748b;
+            text-transform: uppercase;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+        .kpi-value {
+            font-size: 24px;
+            font-weight: 800;
+            color: #0f172a;
+            margin: 0;
+        }
+        .kpi-icon-box {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+        }
+        .icon-rev { background: #ede9fe; color: #7c3aed; }
+        .icon-passes { background: #fce7f3; color: #db2777; }
+        .icon-staff { background: #e0f2fe; color: #0284c7; }
+        .icon-venue { background: #ecfdf5; color: #059669; }
+
+        /* OPERATIONS TABLE CARD */
+        .table-card {
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.02);
+            overflow: hidden;
+            margin-bottom: 28px;
+        }
+        .table-header-toolbar {
+            padding: 20px 24px;
+            border-bottom: 1px solid #f1f5f9;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+        .filter-btn-group {
+            display: flex;
+            gap: 8px;
+        }
+        .filter-btn {
+            background: #f1f5f9;
+            border: 1px solid #e2e8f0;
+            color: #475569;
+            font-size: 12px;
+            font-weight: 600;
+            padding: 8px 14px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .filter-btn.active {
+            background: #0f172a;
+            color: #ffffff;
+            border-color: #0f172a;
+        }
+        .search-box {
+            position: relative;
+            min-width: 280px;
+        }
+        .search-box input {
+            width: 100%;
+            padding: 8px 12px 8px 34px;
+            border-radius: 8px;
+            border: 1px solid #cbd5e1;
+            font-size: 13px;
+            outline: none;
+            box-sizing: border-box;
+        }
+        .search-box i {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #94a3b8;
+            font-size: 13px;
+        }
+
+        /* DATA TABLE */
+        .admin-table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+        }
+        .admin-table th {
+            background: #f8fafc;
+            padding: 14px 20px;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #64748b;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        .admin-table td {
+            padding: 16px 20px;
+            border-bottom: 1px solid #f1f5f9;
+            font-size: 13px;
+            vertical-align: middle;
+        }
+        .admin-table tr:hover {
+            background: #fdfdfd;
+        }
+
+        .status-chip {
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            display: inline-block;
+        }
+        .status-confirmed { background: #ecfdf5; color: #059669; border: 1px solid #a7f3d0; }
+        .status-dispatched { background: #eff6ff; color: #2563eb; border: 1px solid #bfdbfe; }
+        .status-completed { background: #f5f3ff; color: #7c3aed; border: 1px solid #ddd6fe; }
+        .status-cancelled { background: #fef2f2; color: #dc2626; border: 1px solid #fecaca; }
+        .status-pending_approval { background: #fffbeb; color: #b45309; border: 1px solid #fde68a; }
+        .status-approved_awaiting_payment { background: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe; }
+
+        .btn-action-manage {
+            background: #ede9fe;
+            color: #7c3aed;
+            border: 1px solid #ddd6fe;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .btn-action-manage:hover {
+            background: #7c3aed;
+            color: #ffffff;
+        }
+
+        .btn-action-approve {
+            background: #059669;
+            color: #ffffff;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            transition: background 0.15s;
+        }
+        .btn-action-approve:hover {
+            background: #047857;
+        }
+
+        /* MODAL */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(4px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 999;
+        }
+        .modal-overlay.active { display: flex; }
+        .modal-card {
+            background: #ffffff;
+            border-radius: 16px;
+            width: 100%;
+            max-width: 520px;
+            padding: 24px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+        }
+
+        @media (max-width: 1024px) {
+            .kpi-grid { grid-template-columns: repeat(2, 1fr); }
+            .admin-table { display: block; overflow-x: auto; }
+        }
+    </style>
+</head>
+<body>
+
+    <header class="admin-nav">
+        <a href="/admin" class="admin-nav-brand">
+            <div style="width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;">
+                <img src="{{ url_for('static', filename='images/E for evora.png') }}" alt="Evora" style="width: 100%; height: 100%; object-fit: contain;">
+            </div>
+            <span>evora</span>
+            <span class="admin-badge">Owner Command Center</span>
+        </a>
+
+        <div style="display: flex; align-items: center; gap: 14px;">
+            <a href="/" target="_blank" style="color: #94a3b8; text-decoration: none; font-size: 13px; font-weight: 500;">
+                <i class="fa-solid fa-arrow-up-right-from-square"></i> Open Live Site
+            </a>
+            <button onclick="refreshAllAdminData()" class="btn-action-manage" style="background:#1e293b; color:#fff; border-color:#334155;">
+                <i class="fa-solid fa-rotate"></i> Refresh
+            </button>
+            <button onclick="adminLogout()" class="btn-action-manage" style="background:#ef4444; color:#fff; border:none; cursor:pointer;">
+                <i class="fa-solid fa-right-from-bracket"></i> Logout
+            </button>
+        </div>
+    </header>
+
+    <main class="admin-container">
+        
+        <div class="admin-main-tabs">
+            <button class="main-tab-btn active" id="tab-btn-bookings" onclick="switchAdminSection('bookings', this)">
+                <i class="fa-solid fa-calendar-check"></i> Bookings & Allocation Pipeline
+            </button>
+            <button class="main-tab-btn" id="tab-btn-users" onclick="switchAdminSection('users', this)">
+                <i class="fa-solid fa-users"></i> Registered User Directory
+            </button>
+            <button class="main-tab-btn" id="tab-btn-logs" onclick="switchAdminSection('logs', this)">
+                <i class="fa-solid fa-shield-halved"></i> Live Logged-In Users & Audit Stream
+            </button>
+        </div>
+<!-- In Section 1 (Bookings Toolbar) -->
+<div class="table-header-toolbar">
+    <div class="filter-btn-group">
+        <button class="filter-btn active" onclick="filterTable('all', this)">All Bookings (<span id="count-all">0</span>)</button>
+        <button class="filter-btn" onclick="filterTable('passes', this)">Passes</button>
+        <button class="filter-btn" onclick="filterTable('manpower', this)">Manpower</button>
+        <button class="filter-btn" onclick="filterTable('venues', this)">Venues</button>
+    </div>
+
+    <div style="display:flex; gap:10px; align-items:center;">
+        <div class="search-box">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <input type="text" id="admin-search-input" placeholder="Search by customer, title, or ref ID..." onkeyup="searchTable()">
+        </div>
+        <button onclick="clearAllBookings()" style="background:#fee2e2; color:#dc2626; border:1px solid #fca5a5; padding:8px 14px; border-radius:8px; font-weight:700; font-size:12px; cursor:pointer;">
+            <i class="fa-solid fa-trash-can"></i> Clear All Bookings
+        </button>
+    </div>
+</div>
+        <div id="section-bookings">
+            <div class="kpi-grid">
+                <div class="kpi-card">
+                    <div>
+                        <div class="kpi-title">Gross Revenue</div>
+                        <h3 class="kpi-value" id="kpi-revenue">₹ 0</h3>
+                    </div>
+                    <div class="kpi-icon-box icon-rev"><i class="fa-solid fa-indian-rupee-sign"></i></div>
+                </div>
+
+                <div class="kpi-card">
+                    <div>
+                        <div class="kpi-title">Concert Passes Sold</div>
+                        <h3 class="kpi-value" id="kpi-passes">0</h3>
+                    </div>
+                    <div class="kpi-icon-box icon-passes"><i class="fa-solid fa-ticket"></i></div>
+                </div>
+
+                <div class="kpi-card">
+                    <div>
+                        <div class="kpi-title">Manpower & Plans</div>
+                        <h3 class="kpi-value" id="kpi-staff">0</h3>
+                    </div>
+                    <div class="kpi-icon-box icon-staff"><i class="fa-solid fa-user-group"></i></div>
+                </div>
+
+                <div class="kpi-card">
+                    <div>
+                        <div class="kpi-title">Venue Reservations</div>
+                        <h3 class="kpi-value" id="kpi-venues">0</h3>
+                    </div>
+                    <div class="kpi-icon-box icon-venue"><i class="fa-solid fa-building"></i></div>
+                </div>
+            </div>
+
+            <div class="table-card">
+                <div class="table-header-toolbar">
+                    <div class="filter-btn-group">
+                        <button class="filter-btn active" onclick="filterTable('all', this)">All Bookings (<span id="count-all">0</span>)</button>
+                        <button class="filter-btn" onclick="filterTable('passes', this)">Passes</button>
+                        <button class="filter-btn" onclick="filterTable('manpower', this)">Manpower</button>
+                        <button class="filter-btn" onclick="filterTable('venues', this)">Venues</button>
+                    </div>
+
+                    <div class="search-box">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                        <input type="text" id="admin-search-input" placeholder="Search by customer, title, or ref ID..." onkeyup="searchTable()">
+                    </div>
+                </div>
+
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>Ref ID</th>
+                            <th>Type</th>
+                            <th>Customer Info</th>
+                            <th>Title & Specifications</th>
+                            <th>Booking Date</th>
+                            <th>Total (₹)</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="admin-table-body">
+                        <tr><td colspan="8" style="text-align:center; padding:30px; color:#94a3b8;">Loading bookings...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div id="section-users" style="display: none;">
+            <div class="table-card">
+                <div class="table-header-toolbar">
+                    <div>
+                        <h3 style="margin: 0; font-size: 16px; font-weight: 700;">Verified User Database</h3>
+                        <p style="margin: 2px 0 0 0; font-size: 12px; color: #64748b;">Complete roster of customers registered on Evora</p>
+                    </div>
+                </div>
+
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>User ID</th>
+                            <th>Full Name</th>
+                            <th>Registered Email</th>
+                            <th>Phone Number</th>
+                            <th>Role</th>
+                            <th>Joined Date</th>
+                        </tr>
+                    </thead>
+                    <tbody id="admin-users-table-body">
+                        <tr><td colspan="6" style="text-align:center; padding:30px; color:#94a3b8;">Loading users...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div id="section-logs" style="display: none;">
+            <div class="table-card">
+                <div class="table-header-toolbar">
+                    <div>
+                        <h3 style="margin: 0; font-size: 16px; font-weight: 700;">Live Logged-In Users & Audit Stream</h3>
+                        <p style="margin: 2px 0 0 0; font-size: 12px; color: #64748b;">Real-time timestamps, emails, and IPs of users logging in</p>
+                    </div>
+                </div>
+
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>Log ID</th>
+                            <th>User Name</th>
+                            <th>User Email</th>
+                            <th>Login Timestamp</th>
+                            <th>IP Address</th>
+                            <th>Auth Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="admin-logs-table-body">
+                        <tr><td colspan="6" style="text-align:center; padding:30px; color:#94a3b8;">Loading login logs...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </main>
+
+    <div class="modal-overlay" id="allocation-modal">
+        <div class="modal-card">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px;">
+                <h3 style="margin: 0; font-size: 18px; font-weight: 700;">Allocate & Update Booking</h3>
+                <button onclick="closeAllocationModal()" style="background: none; border: none; font-size: 16px; cursor: pointer; color: #64748b;"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+
+            <input type="hidden" id="modal-booking-id">
+
+            <div style="background: #f8fafc; border-radius: 8px; padding: 12px 14px; margin-bottom: 16px; font-size: 13px;">
+                <div style="color:#64748b; font-size:11px; text-transform:uppercase; font-weight:600;">Booking Reference</div>
+                <div style="font-weight:700; color:#7c3aed;" id="modal-ref-text">REF-00000</div>
+                <div style="font-size:12px; margin-top:4px;" id="modal-details-text">Event Title & Details</div>
+            </div>
+
+            <div style="margin-bottom: 14px;">
+                <label style="font-size: 12px; font-weight: 600; color: #334155; display: block; margin-bottom: 4px;">Update Status</label>
+                <select id="modal-status-select" class="form-input" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #cbd5e1; font-family: inherit;">
+                    <option value="CONFIRMED">CONFIRMED</option>
+                    <option value="APPROVED_AWAITING_PAYMENT">APPROVED_AWAITING_PAYMENT</option>
+                    <option value="ALLOCATED / DISPATCHED">ALLOCATED / DISPATCHED</option>
+                    <option value="COMPLETED">COMPLETED</option>
+                    <option value="CANCELLED">CANCELLED</option>
+                </select>
+            </div>
+
+            <div style="margin-bottom: 18px;">
+                <label style="font-size: 12px; font-weight: 600; color: #334155; display: block; margin-bottom: 4px;">Staff / Venue Allocation Details</label>
+                <textarea id="modal-allocation-notes" placeholder="e.g., Assigned Supervisor Rahul Deshmukh (Team Alpha - 12 Crew) or Hall Manager Assigned: Pratik" rows="3" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #cbd5e1; font-family: inherit; font-size: 13px; box-sizing: border-box;"></textarea>
+            </div>
+
+            <button class="btn-pay-submit" onclick="submitAllocationUpdate()" style="width: 100%; padding: 12px; font-size: 14px;">Save & Dispatch Update</button>
+        </div>
+    </div>
+
+    <script>
+        let allBookingsData = [];
+        let currentFilter = 'all';
+
+        function switchAdminSection(sectionName, btn) {
+            document.querySelectorAll('.main-tab-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+
+            document.getElementById('section-bookings').style.display = 'none';
+            document.getElementById('section-users').style.display = 'none';
+            document.getElementById('section-logs').style.display = 'none';
+
+            document.getElementById(`section-${sectionName}`).style.display = 'block';
+
+            if (sectionName === 'users' || sectionName === 'logs') {
+                loadAdminUsersAndLogs();
+            }
+        }
+
+        async function refreshAllAdminData() {
+            await Promise.all([loadAdminBookings(), loadAdminUsersAndLogs()]);
+        }
+
+        async function loadAdminBookings() {
+            try {
+                const res = await fetch('/api/admin/all-bookings');
+                const data = await res.json();
+
+                if (data.status === 'success') {
+                    allBookingsData = data.bookings;
+                    document.getElementById('kpi-revenue').innerText = `₹ ${data.stats.total_revenue.toLocaleString('en-IN')}`;
+                    document.getElementById('kpi-passes').innerText = data.stats.passes_count;
+                    document.getElementById('kpi-staff').innerText = data.stats.manpower_count;
+                    document.getElementById('kpi-venues').innerText = data.stats.venues_count;
+                    document.getElementById('count-all').innerText = data.stats.total_bookings;
+                    renderTableRows();
+                }
+            } catch (err) {
+                console.error("Admin booking fetch error:", err);
+            }
+        }
+
+        async function loadAdminUsersAndLogs() {
+            try {
+                const res = await fetch('/api/admin/users-and-logs');
+                const data = await res.json();
+
+                if (data.status === 'success') {
+                    // Populate Users Table
+                    const usersTbody = document.getElementById('admin-users-table-body');
+                    usersTbody.innerHTML = '';
+                    if (!data.users || data.users.length === 0) {
+                        usersTbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:30px; color:#94a3b8;">No registered users found in database.</td></tr>`;
+                    } else {
+                        data.users.forEach(u => {
+                            usersTbody.innerHTML += `
+                                <tr>
+                                    <td><strong style="color:#7c3aed;">#${u.id}</strong></td>
+                                    <td><strong>${u.fullname}</strong></td>
+                                    <td>${u.email}</td>
+                                    <td>${u.phone || 'N/A'}</td>
+                                    <td><span class="status-chip ${u.role === 'admin' ? 'status-completed' : 'status-confirmed'}">${u.role.toUpperCase()}</span></td>
+                                    <td>${u.created_at || 'Recent'}</td>
+                                </tr>
+                            `;
+                        });
+                    }
+
+                    // Populate Logs Table
+                    const logsTbody = document.getElementById('admin-logs-table-body');
+                    logsTbody.innerHTML = '';
+                    if (!data.logs || data.logs.length === 0) {
+                        logsTbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:30px; color:#94a3b8;">No login activity recorded yet.</td></tr>`;
+                    } else {
+                        data.logs.forEach(l => {
+                            logsTbody.innerHTML += `
+                                <tr>
+                                    <td>#${l.id}</td>
+                                    <td><strong>${l.fullname}</strong></td>
+                                    <td>${l.email}</td>
+                                    <td><span style="color:#7c3aed; font-weight:600;"><i class="fa-solid fa-clock"></i> ${l.time}</span></td>
+                                    <td><code>${l.ip}</code></td>
+                                    <td><span class="status-chip status-confirmed"><i class="fa-solid fa-check"></i> ${l.status}</span></td>
+                                </tr>
+                            `;
+                        });
+                    }
+                }
+            } catch (err) {
+                console.error("Admin user/logs fetch error:", err);
+            }
+        }
+
+        function filterTable(type, btn) {
+            currentFilter = type;
+            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            renderTableRows();
+        }
+
+        function searchTable() { renderTableRows(); }
+
+        function renderTableRows() {
+            const query = (document.getElementById('admin-search-input').value || '').toLowerCase();
+            const tbody = document.getElementById('admin-table-body');
+            tbody.innerHTML = '';
+
+            const filtered = allBookingsData.filter(b => {
+                const matchesType = (currentFilter === 'all') || (b.type === currentFilter);
+                const matchesQuery = 
+                    b.ref.toLowerCase().includes(query) ||
+                    b.title.toLowerCase().includes(query) ||
+                    b.customer_name.toLowerCase().includes(query) ||
+                    b.user_email.toLowerCase().includes(query);
+                return matchesType && matchesQuery;
+            });
+
+            if (filtered.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; padding: 40px; color: #94a3b8;">No matching bookings found.</td></tr>`;
+                return;
+            }
+
+            filtered.forEach(b => {
+                const statusLower = (b.status || '').toLowerCase();
+                let statusClass = 'status-confirmed';
+                
+                if (statusLower.includes('dispatched') || statusLower.includes('allocated')) {
+                    statusClass = 'status-dispatched';
+                } else if (statusLower === 'completed') {
+                    statusClass = 'status-completed';
+                } else if (statusLower === 'cancelled') {
+                    statusClass = 'status-cancelled';
+                } else if (statusLower === 'pending_approval') {
+                    statusClass = 'status-pending_approval';
+                } else if (statusLower === 'approved_awaiting_payment') {
+                    statusClass = 'status-approved_awaiting_payment';
+                }
+
+                let iconType = b.type === 'manpower' ? 'fa-user-tie' : (b.type === 'venues' ? 'fa-building' : 'fa-ticket');
+
+                // Dynamic actions: 1-click Approve for pending venues, or general Manage modal
+         // In renderTableRows():
+let actionBtnHTML = '';
+if (b.type === 'venues' && b.status === 'PENDING_APPROVAL') {
+    actionBtnHTML = `
+        <div style="display:flex; gap:6px; align-items:center;">
+            <button class="btn-action-approve" onclick="approveVenueDirect(${b.id}, '${b.title.replace(/'/g, "\\'")}', '${b.customer_name.replace(/'/g, "\\'")}')">
+                <i class="fa-solid fa-check"></i> Approve
+            </button>
+            <button class="btn-action-manage" onclick="openAllocationModal(${b.id}, '${b.ref}', '${b.title.replace(/'/g, "\\'")}', '${b.status}')">
+                <i class="fa-solid fa-sliders"></i>
+            </button>
+            <button onclick="deleteSingleBooking(${b.id}, '${b.ref}')" title="Delete Booking" style="background:#fef2f2; color:#ef4444; border:1px solid #fecaca; padding:6px 10px; border-radius:6px; cursor:pointer;">
+                <i class="fa-solid fa-trash"></i>
+            </button>
+        </div>
+    `;
+} else {
+    actionBtnHTML = `
+        <div style="display:flex; gap:6px; align-items:center;">
+            <button class="btn-action-manage" onclick="openAllocationModal(${b.id}, '${b.ref}', '${b.title.replace(/'/g, "\\'")}', '${b.status}')">
+                <i class="fa-solid fa-sliders"></i> Manage
+            </button>
+            <button onclick="deleteSingleBooking(${b.id}, '${b.ref}')" title="Delete Booking" style="background:#fef2f2; color:#ef4444; border:1px solid #fecaca; padding:6px 10px; border-radius:6px; cursor:pointer;">
+                <i class="fa-solid fa-trash"></i>
+            </button>
+        </div>
+    `;
+}
+
+                tbody.innerHTML += `
+                    <tr>
+                        <td><strong style="color:#7c3aed;">${b.ref}</strong></td>
+                        <td><span style="font-size:12px; color:#64748b;"><i class="fa-solid ${iconType}"></i> ${b.type.toUpperCase()}</span></td>
+                        <td>
+                            <div style="font-weight:600; color:#0f172a;">${b.customer_name}</div>
+                            <div style="font-size:11px; color:#64748b;">${b.user_email} • ${b.customer_phone}</div>
+                        </td>
+                        <td>
+                            <div style="font-weight:600;">${b.title}</div>
+                            <div style="font-size:11px; color:#64748b; max-width: 320px;">${b.details}</div>
+                        </td>
+                        <td>${b.date}</td>
+                        <td><strong>₹ ${b.price.toLocaleString('en-IN')}</strong></td>
+                        <td><span class="status-chip ${statusClass}">${b.status.replace(/_/g, ' ')}</span></td>
+                        <td>${actionBtnHTML}</td>
+                    </tr>
+                `;
+            });
+        }
+
+        async function approveVenueDirect(bookingId, venueName, customerName) {
+            if (!confirm(`Allocate ${venueName} to ${customerName} and unlock their payment gateway?`)) return;
+
+            try {
+                const res = await fetch('/api/admin/approve-venue-booking', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify({ booking_id: bookingId })
+                });
+                const data = await res.json();
+
+                if (res.ok && data.status === 'success') {
+                    alert(data.message);
+                    loadAdminBookings();
+                } else {
+                    alert(data.message || "Approval failed.");
+                }
+            } catch (err) {
+                alert("Connection lost with server.");
+            }
+        }
+
+        function openAllocationModal(id, ref, title, status) {
+            document.getElementById('modal-booking-id').value = id;
+            document.getElementById('modal-ref-text').innerText = ref;
+            document.getElementById('modal-details-text').innerText = title;
+            document.getElementById('modal-status-select').value = status;
+            document.getElementById('modal-allocation-notes').value = '';
+            document.getElementById('allocation-modal').classList.add('active');
+        }
+
+        function closeAllocationModal() {
+            document.getElementById('allocation-modal').classList.remove('active');
+        }
+
+        // Delete a single booking/transaction
+        async function deleteSingleBooking(bookingId, ref) {
+            if (!confirm(`Are you sure you want to permanently delete transaction #${ref} from the pipeline?`)) return;
+
+            try {
+                const res = await fetch(`/api/admin/delete-booking/${bookingId}`, {
+                    method: 'DELETE',
+                    credentials: 'include'
+                });
+                const data = await res.json();
+
+                if (res.ok && data.status === 'success') {
+                    loadAdminBookings();
+                } else {
+                    alert(data.message || "Failed to delete booking.");
+                }
+            } catch (err) {
+                alert("Server error occurred while deleting transaction.");
+            }
+        }
+
+        // Clear all bookings from pipeline
+        async function clearAllBookings() {
+            const confirmation = prompt("⚠️ WARNING: This will delete ALL bookings and reset gross revenue to ₹0.\n\nType 'DELETE' to confirm:");
+            if (confirmation !== 'DELETE') {
+                alert("Operation cancelled.");
+                return;
+            }
+
+            try {
+                const res = await fetch('/api/admin/clear-all-bookings', {
+                    method: 'POST',
+                    credentials: 'include'
+                });
+                const data = await res.json();
+
+                if (res.ok && data.status === 'success') {
+                    alert("Pipeline reset successfully.");
+                    loadAdminBookings();
+                } else {
+                    alert(data.message || "Failed to clear bookings.");
+                }
+            } catch (err) {
+                alert("Server error occurred while resetting bookings.");
+            }
+        }
+
+        // Clear user login audit logs
+        async function clearAllLogs() {
+            if (!confirm("Are you sure you want to clear the entire login audit history?")) return;
+
+            try {
+                const res = await fetch('/api/admin/clear-login-logs', {
+                    method: 'POST',
+                    credentials: 'include'
+                });
+                const data = await res.json();
+
+                if (res.ok && data.status === 'success') {
+                    loadAdminUsersAndLogs();
+                } else {
+                    alert(data.message || "Failed to clear logs.");
+                }
+            } catch (err) {
+                alert("Server error occurred while clearing logs.");
+            }
+        }
+        async function submitAllocationUpdate() {
+            const bookingId = document.getElementById('modal-booking-id').value;
+            const newStatus = document.getElementById('modal-status-select').value;
+            const notes = document.getElementById('modal-allocation-notes').value;
+
+            try {
+                const res = await fetch('/api/admin/update-booking-status', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify({
+                        booking_id: bookingId,
+                        status: newStatus,
+                        allocation_notes: notes
+                    })
+                });
+                const data = await res.json();
+                if (res.ok && data.status === 'success') {
+                    alert(data.message);
+                    closeAllocationModal();
+                    loadAdminBookings();
+                } else {
+                    alert(data.message || "Failed to update booking.");
+                }
+            } catch (err) {
+                alert("Server error occurred while updating status.");
+            }
+        }
+
+        function adminLogout() {
+            localStorage.clear();
+            sessionStorage.clear();
+            window.location.href = "/logout";
+        }
+
+        window.addEventListener('DOMContentLoaded', refreshAllAdminData);
+    </script>
+</body>
+</html>

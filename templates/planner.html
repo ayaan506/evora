@@ -1,0 +1,1083 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Plan My Event — Evora</title>
+    
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='images/E for evora.png') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='concerts.css') }}">
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- QRCode Generator Engine -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
+    <style>
+        .planner-container {
+            max-width: 1200px;
+            margin: 90px auto 60px auto;
+            padding: 0 24px;
+        }
+        .planner-hero {
+            text-align: center;
+            margin-bottom: 36px;
+        }
+        .planner-hero h1 {
+            font-size: 32px;
+            font-weight: 700;
+            color: #0f172a;
+            margin-bottom: 8px;
+        }
+        .planner-hero p {
+            color: #64748b;
+            font-size: 15px;
+            max-width: 680px;
+            margin: 0 auto;
+        }
+        .planner-grid {
+            display: grid;
+            grid-template-columns: 1fr 1.15fr;
+            gap: 32px;
+            align-items: start;
+        }
+        .planner-card {
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 16px;
+            padding: 28px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+        }
+        .planner-section-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: #0f172a;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .planner-section-title i {
+            color: #7c3aed;
+        }
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin-bottom: 16px;
+        }
+        .form-group-full {
+            margin-bottom: 16px;
+        }
+        .form-group-full label, .form-row label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            color: #334155;
+            margin-bottom: 6px;
+        }
+        .calc-btn-generate {
+            width: 100%;
+            background: linear-gradient(135deg, #7c3aed, #db2777);
+            color: #ffffff;
+            border: none;
+            padding: 14px;
+            border-radius: 10px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            transition: opacity 0.2s, transform 0.15s;
+        }
+        .calc-btn-generate:hover {
+            opacity: 0.95;
+            transform: translateY(-2px);
+        }
+
+        /* RESULT BLUEPRINT PANEL */
+        .blueprint-placeholder {
+            text-align: center;
+            padding: 60px 20px;
+            color: #94a3b8;
+        }
+        .blueprint-placeholder i {
+            font-size: 48px;
+            color: #cbd5e1;
+            margin-bottom: 16px;
+        }
+        .blueprint-role-card {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 14px 18px;
+            margin-bottom: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.2s ease;
+        }
+        .blueprint-role-card.excluded {
+            background: #f1f5f9;
+            border-color: #cbd5e1;
+            opacity: 0.55;
+        }
+        .blueprint-role-left {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+        .blueprint-role-icon {
+            width: 38px;
+            height: 38px;
+            border-radius: 8px;
+            background: #ede9fe;
+            color: #7c3aed;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+        }
+        .blueprint-role-card.excluded .blueprint-role-icon {
+            background: #e2e8f0;
+            color: #94a3b8;
+        }
+        .role-name {
+            font-size: 14px;
+            font-weight: 600;
+            color: #0f172a;
+            margin: 0;
+        }
+        .role-desc {
+            font-size: 11px;
+            color: #64748b;
+            margin: 2px 0 0 0;
+        }
+        .role-actions-right {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .blueprint-count-badge {
+            background: #7c3aed;
+            color: #ffffff;
+            font-size: 12px;
+            font-weight: 700;
+            padding: 4px 12px;
+            border-radius: 20px;
+            white-space: nowrap;
+        }
+        .blueprint-role-card.excluded .blueprint-count-badge {
+            background: #94a3b8;
+            text-decoration: line-through;
+        }
+        .btn-toggle-role {
+            background: #f1f5f9;
+            border: 1px solid #cbd5e1;
+            color: #ef4444;
+            padding: 6px 10px;
+            border-radius: 6px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .btn-toggle-role:hover {
+            background: #fee2e2;
+            border-color: #fca5a5;
+        }
+        .blueprint-role-card.excluded .btn-toggle-role {
+            color: #10b981;
+            background: #ffffff;
+            border-color: #10b981;
+        }
+        .blueprint-role-card.excluded .btn-toggle-role:hover {
+            background: #ecfdf5;
+        }
+        .summary-metric-bar {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+        .metric-tile {
+            background: #f1f5f9;
+            padding: 12px;
+            border-radius: 8px;
+            text-align: center;
+        }
+        .metric-tile span {
+            font-size: 11px;
+            color: #64748b;
+            text-transform: uppercase;
+            font-weight: 600;
+        }
+        .metric-tile h4 {
+            font-size: 18px;
+            font-weight: 700;
+            color: #0f172a;
+            margin: 4px 0 0 0;
+        }
+
+        /* 50-50 PAYMENT SPLIT CARD */
+        .payment-milestone-box {
+            background: #fdf4ff;
+            border: 1px solid #f0abfc;
+            border-radius: 12px;
+            padding: 18px;
+            margin-top: 20px;
+        }
+        .milestone-header {
+            font-size: 13px;
+            font-weight: 700;
+            color: #86198f;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+        .milestone-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+        .milestone-card {
+            background: #ffffff;
+            border: 1px solid #f5d0fe;
+            border-radius: 8px;
+            padding: 12px;
+        }
+        .milestone-card span {
+            font-size: 11px;
+            color: #701a75;
+            font-weight: 600;
+            display: block;
+        }
+        .milestone-card h4 {
+            font-size: 17px;
+            font-weight: 800;
+            color: #a21caf;
+            margin: 4px 0 2px 0;
+        }
+        .milestone-card p {
+            font-size: 10px;
+            color: #64748b;
+            margin: 0;
+        }
+
+        /* TERMS & CONDITIONS BLOCK */
+        .terms-conditions-card {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 18px;
+            margin-top: 18px;
+        }
+        .terms-title {
+            font-size: 13px;
+            font-weight: 700;
+            color: #0f172a;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .terms-list {
+            margin: 0;
+            padding-left: 18px;
+            font-size: 11px;
+            color: #475569;
+            line-height: 1.7;
+        }
+        .terms-list li {
+            margin-bottom: 4px;
+        }
+
+        /* CONSENT CHECKBOX */
+        .consent-row {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            margin-top: 14px;
+            font-size: 12px;
+            color: #334155;
+            cursor: pointer;
+        }
+        .consent-row input {
+            margin-top: 2px;
+            accent-color: #7c3aed;
+            cursor: pointer;
+        }
+
+        /* TOTAL BUDGET BAR */
+        .total-budget-box {
+            background: linear-gradient(135deg, rgba(124,58,237,0.08), rgba(219,39,119,0.08));
+            border: 1.5px dashed #7c3aed;
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .budget-amount {
+            font-size: 24px;
+            font-weight: 800;
+            color: #7c3aed;
+        }
+
+        /* =======================================================
+           SCOPED EASEBUZZ PAYMENT GATEWAY MODAL
+        ======================================================= */
+        .ebz-scoped-overlay {
+            position: fixed;
+            inset: 0;
+            background: linear-gradient(135deg, rgba(15, 23, 42, 0.85), rgba(30, 27, 75, 0.85));
+            z-index: 99999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(8px);
+            padding: 20px;
+        }
+        .ebz-scoped-wrapper {
+            width: 100%;
+            max-width: 820px;
+        }
+        .ebz-scoped-card {
+            background: #ffffff;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.35);
+        }
+        .ebz-scoped-banner {
+            background: #3b49df;
+            padding: 18px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: #ffffff;
+        }
+        .ebz-scoped-body {
+            display: flex;
+            min-height: 380px;
+        }
+        .ebz-scoped-sidebar {
+            width: 42%;
+            border-right: 1px solid #e2e8f0;
+            padding: 20px 16px;
+            background: #ffffff;
+        }
+        .ebz-scoped-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 12px;
+            border-radius: 12px;
+            cursor: pointer;
+            margin-bottom: 4px;
+        }
+        .ebz-scoped-item.active {
+            background: #eff6ff;
+            border: 1px solid #bfdbfe;
+        }
+        .ebz-scoped-content {
+            width: 58%;
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            background: #ffffff;
+        }
+        .ebz-scoped-qr {
+            padding: 12px;
+            background: #ffffff;
+            border: 2px solid #e2e8f0;
+            border-radius: 14px;
+            display: inline-block;
+        }
+        .ebz-scoped-pay-btn {
+            width: 100%;
+            background: #059669;
+            color: #ffffff;
+            border: none;
+            padding: 14px;
+            border-radius: 10px;
+            font-size: 15px;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        .ebz-pulse-success {
+            width: 76px;
+            height: 76px;
+            border-radius: 50%;
+            background: #10b981;
+            color: #ffffff;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 36px;
+            margin-bottom: 12px;
+            box-shadow: 0 0 0 10px #ecfdf5;
+            animation: planPulse 1.2s infinite;
+        }
+        @keyframes planPulse {
+            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4); }
+            70% { transform: scale(1); box-shadow: 0 0 0 14px rgba(16, 185, 129, 0); }
+            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+        }
+
+        @media (max-width: 900px) {
+            .planner-grid { grid-template-columns: 1fr; }
+            .form-row { grid-template-columns: 1fr; }
+            .milestone-grid { grid-template-columns: 1fr; }
+            .ebz-scoped-body { flex-direction: column; }
+            .ebz-scoped-sidebar { width: 100%; border-right: none; border-bottom: 1px solid #e2e8f0; }
+            .ebz-scoped-content { width: 100%; }
+        }
+    </style>
+</head>
+<body class="light-theme">
+
+    <!-- NAVIGATION BAR -->
+    <nav class="light-nav">
+        <a href="/" class="nav-logo-group" style="display: flex; align-items: center; gap: 10px; text-decoration: none;">
+            <div class="nav-logo-spacer" style="width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; overflow: visible;">
+                <img src="{{ url_for('static', filename='images/E for evora.png') }}" alt="Evora" class="nav-branded-logo-img" style="width: 100%; height: 100%; object-fit: contain; transform: scale(1.10);" onerror="this.style.display='none'">
+            </div>  
+            <span class="nav-logo-text" style="font-size: 24px; font-weight: 700;">evora</span>
+        </a>
+        <div class="light-nav-links">
+            <a href="/events">Events</a>
+            <a href="/venues">Venues</a>
+            <a href="/manpower">Hire Staff</a>
+            <a href="/planner" class="active" style="color: #7c3aed; font-weight:600;">Plan My Event</a>
+            <a href="/contact">Contact</a>
+        </div>
+        <div class="light-nav-actions" id="nav-actions-logged-out">
+            <a href="/login" class="btn-light-login">Login</a>
+            <a href="/signup" class="btn-light-signup">Sign Up</a>
+        </div>
+        <div class="light-nav-actions" id="nav-actions-logged-in" style="display: none;">
+            <a href="/dashboard" class="btn-light-signup">
+                <i class="fa-solid fa-user"></i> My Dashboard
+            </a>
+        </div>
+    </nav>
+
+    <main class="planner-container">
+        <div class="planner-hero">
+            <h1>Plan Your Event & <span class="gradient-text">Estimate Crew</span></h1>
+            <p>Enter your crowd size, days, and event type to get an instant breakdown of required staff by role, milestones, and total budget.</p>
+        </div>
+
+        <div class="planner-grid">
+            
+            <!-- LEFT COLUMN: EVENT INPUT SPECIFICATIONS -->
+            <div class="planner-card">
+                <h3 class="planner-section-title"><i class="fa-solid fa-sliders"></i> Event Details</h3>
+
+                <form onsubmit="generateEventPlan(event)">
+                    
+                    <div class="form-group-full">
+                        <label>Type of Event</label>
+                        <select id="plan-type" class="form-input" required>
+                            <option value="wedding" selected>Wedding & Reception</option>
+                            <option value="concert">Live Music Concert / Fest</option>
+                            <option value="corporate">Corporate Conference / Summit</option>
+                            <option value="exhibition">Exhibition / Trade Fair</option>
+                            <option value="birthday">Private Party / Birthday Bash</option>
+                            <option value="college">College Fest / Sports Event</option>
+                        </select>
+                    </div>
+
+                    <div class="form-row">
+                        <div>
+                            <label>Expected Crowd Size</label>
+                            <input type="number" id="plan-crowd" class="form-input" min="50" max="50000" value="800" step="50" required>
+                        </div>
+                        <div>
+                            <label>Event Duration (Days)</label>
+                            <input type="number" id="plan-days" class="form-input" min="1" max="14" value="1" required>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div>
+                            <label>Shift Hours (Per Day)</label>
+                            <select id="plan-hours" class="form-input" required>
+                                <option value="4">Half Day (4 Hours)</option>
+                                <option value="8" selected>Standard Shift (8 Hours)</option>
+                                <option value="12">Full Day + Night (12 Hours)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label>Venue Environment</label>
+                            <select id="plan-venue" class="form-input" required>
+                                <option value="indoor">Indoor Banquet / AC Hall</option>
+                                <option value="outdoor" selected>Open Outdoor Lawn / Ground</option>
+                                <option value="hybrid">Hybrid (Indoor + Lawn)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-group-full">
+                        <label>Food & Catering Setup</label>
+                        <select id="plan-catering" class="form-input" required>
+                            <option value="buffet" selected>Full Multi-Cuisine Buffet</option>
+                            <option value="sitdown">Sit-Down Dinner Service</option>
+                            <option value="bar">Cocktail Bar & Finger Food</option>
+                            <option value="none">No In-House Catering Needed</option>
+                        </select>
+                    </div>
+
+                    <button type="submit" class="calc-btn-generate">
+                        <i class="fa-solid fa-calculator"></i> Calculate Staffing & Budget
+                    </button>
+                </form>
+            </div>
+
+            <!-- RIGHT COLUMN: ESTIMATE RESULTS & BUDGET BREAKDOWN -->
+            <div class="planner-card" id="plan-result-box">
+                <div class="blueprint-placeholder" id="plan-empty-state">
+                    <i class="fa-solid fa-clipboard-list"></i>
+                    <h3>Ready to Plan Your Event</h3>
+                    <p style="font-size: 13px;">Fill out the parameters on the left and click calculate to see required staff numbers, 50-50 payment milestones, and terms.</p>
+                </div>
+
+                <div id="plan-content" style="display: none;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
+                        <h3 class="planner-section-title" style="margin-bottom:0;"><i class="fa-solid fa-clipboard-check"></i> Required Staff Breakdown</h3>
+                        <span style="font-size:11px; color:#64748b;"><i class="fa-solid fa-circle-info"></i> Click remove on any unwanted role</span>
+                    </div>
+
+                    <!-- METRICS BAR -->
+                    <div class="summary-metric-bar">
+                        <div class="metric-tile">
+                            <span>Total Staff</span>
+                            <h4 id="stat-total-crew">0</h4>
+                        </div>
+                        <div class="metric-tile">
+                            <span>Male Staff</span>
+                            <h4 id="stat-male-staff">0</h4>
+                        </div>
+                        <div class="metric-tile">
+                            <span>Female Staff</span>
+                            <h4 id="stat-female-staff">0</h4>
+                        </div>
+                    </div>
+
+                    <!-- BREAKDOWN LIST OF ROLES -->
+                    <div id="plan-roles-list"></div>
+
+                    <!-- 50-50 PAYMENT MILESTONE BOX -->
+                    <div class="payment-milestone-box">
+                        <div class="milestone-header">
+                            <i class="fa-solid fa-credit-card"></i> 50-50 Payment Milestone Breakdown
+                        </div>
+                        <div class="milestone-grid">
+                            <div class="milestone-card">
+                                <span>1. 50% Advance Token</span>
+                                <h4 id="split-advance">₹ 0</h4>
+                                <p>Payable on booking to lock & allocate verified staff.</p>
+                            </div>
+                            <div class="milestone-card">
+                                <span>2. 50% Post-Event Settlement</span>
+                                <h4 id="split-final">₹ 0</h4>
+                                <p>Payable within 24 hrs after successful event completion.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- TERMS & CONDITIONS -->
+                    <div class="terms-conditions-card">
+                        <div class="terms-title">
+                            <i class="fa-solid fa-scale-balanced" style="color:#7c3aed;"></i> Evora Staffing Terms & Guidelines
+                        </div>
+                        <ul class="terms-list">
+                            <li><strong>Payment Terms:</strong> Exactly 50% advance is required to confirm crew allocation. The balance 50% is due within 24 hours post-event.</li>
+                            <li><strong>Shift Overtime:</strong> Standard rates apply to planned hours. Any overtime exceeding 30 minutes is billed at standard hourly rates + 10%.</li>
+                            <li><strong>Staff Welfare:</strong> The client is requested to provide potable drinking water and basic staff meal arrangements for shifts exceeding 6 continuous hours.</li>
+                            <li><strong>Replacement Guarantee:</strong> In the rare event of staff illness or emergency, Evora guarantees on-site replacement within 60 minutes.</li>
+                            <li><strong>Cancellation Policy:</strong> 100% advance refund if cancelled 72+ hours before event start; 50% refund if cancelled within 24–72 hours.</li>
+                        </ul>
+
+                        <label class="consent-row">
+                            <input type="checkbox" id="terms-consent" required>
+                            <span>I agree to the 50-50 payment milestone and Evora event staffing terms & conditions.</span>
+                        </label>
+                    </div>
+
+                    <!-- TOTAL BUDGET ESTIMATE & SUBMIT -->
+                    <div class="total-budget-box">
+                        <div>
+                            <span style="font-size:12px; color:#64748b; font-weight:600; text-transform:uppercase;">Total Estimated Staff Budget</span>
+                            <div class="budget-amount" id="stat-total-budget">₹ 0</div>
+                            <span style="font-size:11px; color:#64748b;">(Advance payable now: <strong id="advance-payable-text" style="color:#7c3aed;">₹ 0</strong>)</span>
+                        </div>
+                        <button class="btn-pay-submit" style="padding: 12px 20px; font-size:13px;" onclick="bookEntirePlan()">Pay 50% & Lock Crew <i class="fa-solid fa-arrow-right"></i></button>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- STEP 2: SCOPED EASEBUZZ POPUP GATEWAY -->
+    <div id="evora-gateway-modal" class="ebz-scoped-overlay" style="display: none;">
+        <div class="ebz-scoped-wrapper">
+            
+            <div style="display: flex; justify-content: space-between; align-items: center; color: #fff; margin-bottom: 12px; font-size: 13px;">
+                <button type="button" onclick="closeEasebuzzModal()" style="background:transparent; border:none; color:#fff; cursor:pointer; font-size:13px;">
+                    <i class="fa-solid fa-xmark"></i> Cancel
+                </button>
+                <div><i class="fa-solid fa-globe"></i> English</div>
+            </div>
+
+            <div class="ebz-scoped-card">
+                
+                <div class="ebz-scoped-banner">
+                    <div style="display:flex; align-items:center; gap:12px;">
+                        <div style="width:40px; height:40px; background:#fff; border-radius:8px; display:flex; align-items:center; justify-content:center;">
+                            <img src="{{ url_for('static', filename='images/E for evora.png') }}" style="width:85%;" onerror="this.style.display='none'" alt="Evora">
+                        </div>
+                        <div>
+                            <div style="font-size:15px; font-weight:600;">https://evora.live/checkout/</div>
+                            <div style="font-size:11px; opacity:0.85;">Tr ID <span id="ebz-tr-id">---</span></div>
+                        </div>
+                    </div>
+                    <div style="background:rgba(15,23,42,0.35); padding:6px 14px; border-radius:20px; font-size:12px;">
+                        <span>Valid For</span> <strong id="ebz-timer">14:59</strong>
+                    </div>
+                </div>
+
+                <div class="ebz-scoped-body">
+                    
+                    <div class="ebz-scoped-sidebar">
+                        <div style="font-size:12px; font-weight:600; color:#64748b; margin-bottom:12px;">Payment Method</div>
+                        <div class="ebz-scoped-item active" id="item-tab-upi" onclick="switchTab('upi')">
+                            <i class="fa-solid fa-qrcode" style="font-size:16px; color:#3b49df;"></i>
+                            <div style="flex:1;">
+                                <div style="font-size:13px; font-weight:600; color:#0f172a;">UPI / QR Code</div>
+                                <div style="font-size:11px; color:#059669; font-weight:600;">Instant QR Approval</div>
+                            </div>
+                        </div>
+                        <div class="ebz-scoped-item" id="item-tab-card" onclick="switchTab('card')">
+                            <i class="fa-regular fa-credit-card" style="font-size:16px; color:#64748b;"></i>
+                            <div style="flex:1;">
+                                <div style="font-size:13px; font-weight:600; color:#0f172a;">Credit / Debit Card</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="ebz-scoped-content">
+                        
+                        <!-- TAB 1: UPI / SCANNER -->
+                        <div id="panel-upi" style="display: block;">
+                            <div id="ebz-scan-section" style="text-align:center;">
+                                <div style="font-size:14px; font-weight:600; color:#0f172a; margin-bottom:4px;">Scan QR with any UPI App</div>
+                                <p style="font-size:11px; color:#64748b; margin:0 0 12px 0;">Google Pay • PhonePe • Paytm • BHIM</p>
+                                <div class="ebz-scoped-qr">
+                                    <div id="ebz-qrcode-canvas"></div>
+                                </div>
+                                <div style="font-size:12px; color:#7c3aed; font-weight:600; margin-top:10px;">
+                                    <i class="fa-solid fa-circle-notch fa-spin"></i> Awaiting phone authorization...
+                                </div>
+                            </div>
+
+                            <div id="ebz-success-section" style="display:none; text-align:center; padding:20px 0;">
+                                <div class="ebz-pulse-success"><i class="fa-solid fa-check"></i></div>
+                                <h3 style="font-size:18px; font-weight:700; color:#0f172a; margin:0 0 4px 0;">50% Advance Confirmed!</h3>
+                                <p style="font-size:12px; color:#059669; font-weight:600; margin:0;">Staff allocated & blueprint locked. Redirecting...</p>
+                            </div>
+                        </div>
+
+                        <!-- TAB 2: CARD -->
+                        <div id="panel-card" style="display: none;">
+                            <div style="font-size:13px; font-weight:600; color:#0f172a; margin-bottom:10px;">Enter Card Details</div>
+                            <input type="text" value="4532 •••• •••• 8920" style="width:100%; padding:10px; border:1px solid #cbd5e1; border-radius:8px; margin-bottom:8px; box-sizing:border-box;">
+                            <div style="display:flex; gap:8px;">
+                                <input type="text" value="08/29" style="width:50%; padding:10px; border:1px solid #cbd5e1; border-radius:8px; box-sizing:border-box;">
+                                <input type="password" value="•••" style="width:50%; padding:10px; border:1px solid #cbd5e1; border-radius:8px; box-sizing:border-box;">
+                            </div>
+                        </div>
+
+                        <div style="margin-top: auto;">
+                            <button id="ebz-btn-pay" onclick="simulateManualPayment()" class="ebz-scoped-pay-btn">
+                                <i class="fa-solid fa-shield-halved"></i> Pay 50% Advance <span id="ebz-pay-amount">₹0.00</span>
+                            </button>
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <div style="background:#f8fafc; border-top:1px solid #e2e8f0; padding:12px 24px; display:flex; justify-content:space-between; font-size:12px; color:#64748b;">
+                    <div><i class="fa-brands fa-cc-visa"></i> VISA &bull; <i class="fa-brands fa-cc-mastercard"></i> MasterCard</div>
+                    <div>Powered By <strong>Easebuzz</strong></div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // State storage for dynamic inclusion/exclusion
+        let currentPlanData = {
+            roles: {},
+            days: 1,
+            hours: 8,
+            type: '',
+            crowd: 0,
+            totalBudget: 0,
+            advanceBudget: 0
+        };
+
+        let ebzActiveSession = null;
+        let pollTimer = null;
+        let countdownTimer = null;
+
+        window.addEventListener('DOMContentLoaded', () => {
+            const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
+            if (isLoggedIn) {
+                const loggedOutNav = document.getElementById('nav-actions-logged-out');
+                const loggedInNav = document.getElementById('nav-actions-logged-in');
+                if (loggedOutNav) loggedOutNav.style.display = 'none';
+                if (loggedInNav) loggedInNav.style.display = 'flex';
+            }
+        });
+
+        function generateEventPlan(e) {
+            e.preventDefault();
+
+            const type = document.getElementById('plan-type').value;
+            const crowd = parseInt(document.getElementById('plan-crowd').value) || 100;
+            const days = parseInt(document.getElementById('plan-days').value) || 1;
+            const hours = parseInt(document.getElementById('plan-hours').value) || 8;
+            const venue = document.getElementById('plan-venue').value;
+            const catering = document.getElementById('plan-catering').value;
+
+            // Operational Ratios
+            let secRatio = type === 'concert' ? 120 : (type === 'wedding' ? 180 : 220);
+            if (venue === 'outdoor') secRatio = Math.round(secRatio * 0.9);
+
+            let waitRatio = catering === 'sitdown' ? 30 : (catering === 'buffet' ? 55 : (catering === 'bar' ? 70 : 0));
+            let regRatio = type === 'corporate' || type === 'exhibition' ? 200 : 400;
+
+            // Staff Headcounts
+            const security = Math.max(2, Math.ceil(crowd / secRatio));
+            const registration = Math.max(1, Math.ceil(crowd / regRatio));
+            const waiters = waitRatio > 0 ? Math.max(2, Math.ceil(crowd / waitRatio)) : 0;
+            const bartenders = catering === 'bar' ? Math.max(1, Math.ceil(crowd / 250)) : (type === 'wedding' ? 1 : 0);
+            const valets = Math.max(1, Math.ceil(crowd / 250));
+            const stageCrew = type === 'concert' ? 4 : (type === 'corporate' || type === 'wedding' ? 2 : 1);
+            const housekeeping = Math.max(1, Math.ceil(crowd / 400));
+
+            // Store in state
+            currentPlanData = {
+                type: type,
+                crowd: crowd,
+                days: days,
+                hours: hours,
+                totalBudget: 0,
+                advanceBudget: 0,
+                roles: {
+                    security: { name: 'Security & Entry Bouncers', desc: 'Crowd safety, access control & gate check-ins', count: security, rate: 280, icon: 'fa-shield-halved', femaleRatio: 0.1, enabled: true },
+                    registration: { name: 'Registration & Welcome Ushers', desc: 'Guest arrivals, badge distribution & seating guidance', count: registration, rate: 200, icon: 'fa-id-badge', femaleRatio: 0.7, enabled: true },
+                    waiters: { name: 'Banquet Waiters & Table Servers', desc: 'Buffet food warmers, service clearing & tray service', count: waiters, rate: 180, icon: 'fa-bell-concierge', femaleRatio: 0.35, enabled: waiters > 0 },
+                    bartenders: { name: 'Certified Bartenders', desc: 'Drink mixing, beverage service & bar inventory', count: bartenders, rate: 400, icon: 'fa-martini-glass-citrus', femaleRatio: 0.2, enabled: bartenders > 0 },
+                    valets: { name: 'Valet Parking Drivers', desc: 'Guest vehicle parking & token dispatch', count: valets, rate: 220, icon: 'fa-car', femaleRatio: 0.0, enabled: true },
+                    stageCrew: { name: 'Stagehands & Production Crew', desc: 'Mic checks, equipment loading & console management', count: stageCrew, rate: 250, icon: 'fa-sliders', femaleRatio: 0.1, enabled: true },
+                    housekeeping: { name: 'Housekeeping & Hygiene Crew', desc: 'Continuous floor clearing & venue tidiness', count: housekeeping, rate: 150, icon: 'fa-broom', femaleRatio: 0.5, enabled: true }
+                }
+            };
+
+            renderRolesAndTotals();
+            document.getElementById('plan-empty-state').style.display = 'none';
+            document.getElementById('plan-content').style.display = 'block';
+        }
+
+        function toggleRole(roleKey) {
+            if (currentPlanData.roles[roleKey]) {
+                currentPlanData.roles[roleKey].enabled = !currentPlanData.roles[roleKey].enabled;
+                renderRolesAndTotals();
+            }
+        }
+
+        function renderRolesAndTotals() {
+            let activeStaffCount = 0;
+            let activeFemaleCount = 0;
+            let hourlySubtotal = 0;
+
+            const rolesList = document.getElementById('plan-roles-list');
+            rolesList.innerHTML = '';
+
+            Object.keys(currentPlanData.roles).forEach(key => {
+                const r = currentPlanData.roles[key];
+                if (r.count <= 0) return;
+
+                const isEnabled = r.enabled;
+                if (isEnabled) {
+                    activeStaffCount += r.count;
+                    activeFemaleCount += Math.round(r.count * r.femaleRatio);
+                    hourlySubtotal += (r.count * r.rate);
+                }
+
+                const card = document.createElement('div');
+                card.className = `blueprint-role-card ${isEnabled ? '' : 'excluded'}`;
+                card.id = `card-role-${key}`;
+                card.innerHTML = `
+                    <div class="blueprint-role-left">
+                        <div class="blueprint-role-icon"><i class="fa-solid ${r.icon}"></i></div>
+                        <div>
+                            <p class="role-name">${r.name}</p>
+                            <p class="role-desc">${r.desc}</p>
+                        </div>
+                    </div>
+                    <div class="role-actions-right">
+                        <span class="blueprint-count-badge">${r.count} Staff</span>
+                        <button type="button" class="btn-toggle-role" onclick="toggleRole('${key}')">
+                            <i class="fa-solid ${isEnabled ? 'fa-circle-xmark' : 'fa-circle-plus'}"></i>
+                            ${isEnabled ? 'Remove' : 'Restore'}
+                        </button>
+                    </div>
+                `;
+                rolesList.appendChild(card);
+            });
+
+            // Supervisors recalculation (1 supervisor per 15 staff)
+            const supervisors = activeStaffCount > 0 ? Math.max(1, Math.ceil(activeStaffCount / 15)) : 0;
+            const grandTotalCrew = activeStaffCount > 0 ? (activeStaffCount + supervisors) : 0;
+            const grandFemale = activeFemaleCount;
+            const grandMale = Math.max(0, grandTotalCrew - grandFemale);
+
+            if (supervisors > 0) {
+                hourlySubtotal += (supervisors * 350);
+                const supCard = document.createElement('div');
+                supCard.className = 'blueprint-role-card';
+                supCard.style.borderLeft = '3px solid #7c3aed';
+                supCard.innerHTML = `
+                    <div class="blueprint-role-left">
+                        <div class="blueprint-role-icon"><i class="fa-solid fa-user-tie"></i></div>
+                        <div>
+                            <p class="role-name">Event Operations Supervisors</p>
+                            <p class="role-desc">Floor coordination & on-site schedule oversight (Auto-scaled)</p>
+                        </div>
+                    </div>
+                    <div class="role-actions-right">
+                        <span class="blueprint-count-badge">${supervisors} Staff</span>
+                    </div>
+                `;
+                rolesList.appendChild(supCard);
+            }
+
+            // Total & 50-50 Split Calculations
+            const totalStaffCost = hourlySubtotal * currentPlanData.hours * currentPlanData.days;
+            const managementFee = activeStaffCount > 0 ? Math.round(totalStaffCost * 0.05) : 0;
+            const finalEstimatedCost = totalStaffCost + managementFee;
+            const advance50 = Math.round(finalEstimatedCost * 0.5);
+            const final50 = finalEstimatedCost - advance50;
+
+            currentPlanData.totalBudget = finalEstimatedCost;
+            currentPlanData.advanceBudget = advance50;
+
+            // Render Metrics & Splits
+            document.getElementById('stat-total-crew').innerText = `${grandTotalCrew} Persons`;
+            document.getElementById('stat-male-staff').innerText = `${grandMale} Men`;
+            document.getElementById('stat-female-staff').innerText = `${grandFemale} Women`;
+            document.getElementById('stat-total-budget').innerText = `₹ ${finalEstimatedCost.toLocaleString('en-IN')}`;
+            document.getElementById('split-advance').innerText = `₹ ${advance50.toLocaleString('en-IN')}`;
+            document.getElementById('split-final').innerText = `₹ ${final50.toLocaleString('en-IN')}`;
+            document.getElementById('advance-payable-text').innerText = `₹ ${advance50.toLocaleString('en-IN')}`;
+        }
+
+        async function bookEntirePlan() {
+            // 1. Check Authentication
+            const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
+            if (!isLoggedIn) {
+                alert("⚠️ Please log in to your Evora account before confirming an event plan.");
+                window.location.href = '/login';
+                return;
+            }
+
+            const consentBox = document.getElementById('terms-consent');
+            if (!consentBox.checked) {
+                alert("Please review and accept the Evora Staffing Terms & Conditions (50-50 Payment Milestone) to proceed.");
+                consentBox.focus();
+                return;
+            }
+
+            let activeRolesSummary = [];
+            Object.keys(currentPlanData.roles).forEach(k => {
+                const r = currentPlanData.roles[k];
+                if (r.enabled && r.count > 0) {
+                    activeRolesSummary.push(`${r.count}x ${r.name}`);
+                }
+            });
+
+            if (activeRolesSummary.length === 0) {
+                alert("Please enable at least 1 staff role to proceed with booking.");
+                return;
+            }
+
+            const grandStaffText = document.getElementById('stat-total-crew').innerText;
+            const advanceAmount = currentPlanData.advanceBudget; // 50% advance milestone
+
+            const payload = {
+                booking_type: 'manpower',
+                title: `Custom Blueprint (${currentPlanData.type.toUpperCase()})`,
+                details: `${grandStaffText} [${activeRolesSummary.join(', ')}] • Expected Guests: ${currentPlanData.crowd} • ${currentPlanData.days} Day(s) • Total Budget: ₹${currentPlanData.totalBudget.toLocaleString('en-IN')} (50% Advance Token Paid)`,
+                booking_date: new Date().toISOString().split('T')[0],
+                total_price: advanceAmount
+            };
+
+            // 2. Open Easebuzz Gateway
+            try {
+                const res = await fetch('/api/payment/create-qr-session', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify(payload)
+                });
+                const data = await res.json();
+
+                if (!res.ok || data.status !== 'success') {
+                    alert(data.message || "Could not start payment session.");
+                    return;
+                }
+
+                ebzActiveSession = data.session_id;
+                document.getElementById('ebz-tr-id').innerText = ebzActiveSession;
+                document.getElementById('ebz-pay-amount').innerText = `₹${advanceAmount.toLocaleString('en-IN', {minimumFractionDigits: 2})}`;
+
+                const qrBox = document.getElementById('ebz-qrcode-canvas');
+                qrBox.innerHTML = '';
+                document.getElementById('ebz-scan-section').style.display = 'block';
+                document.getElementById('ebz-success-section').style.display = 'none';
+
+                new QRCode(qrBox, {
+                    text: data.pay_url,
+                    width: 160,
+                    height: 160,
+                    colorDark: "#0f172a",
+                    colorLight: "#ffffff",
+                    correctLevel: QRCode.CorrectLevel.H
+                });
+
+                startTimer(14 * 60 + 59);
+                document.getElementById('evora-gateway-modal').style.display = 'flex';
+
+                if (pollTimer) clearInterval(pollTimer);
+                pollTimer = setInterval(async () => {
+                    try {
+                        const checkRes = await fetch(`/api/payment/check-status/${ebzActiveSession}`);
+                        const checkData = await checkRes.json();
+                        if (checkData.status === 'PAID') {
+                            clearInterval(pollTimer);
+                            finalizePlanPayment(ebzActiveSession, payload);
+                        }
+                    } catch (err) {
+                        console.error(err);
+                    }
+                }, 1500);
+
+            } catch (err) {
+                alert("Connection failed with payment gateway.");
+            }
+        }
+
+        function switchTab(type) {
+            document.getElementById('item-tab-upi').classList.toggle('active', type === 'upi');
+            document.getElementById('item-tab-card').classList.toggle('active', type === 'card');
+            document.getElementById('panel-upi').style.display = type === 'upi' ? 'block' : 'none';
+            document.getElementById('panel-card').style.display = type === 'card' ? 'block' : 'none';
+        }
+
+        async function simulateManualPayment() {
+            const btn = document.getElementById('ebz-btn-pay');
+            btn.disabled = true;
+            btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Authorizing Advance...`;
+
+            const grandStaffText = document.getElementById('stat-total-crew').innerText;
+            const advanceAmount = currentPlanData.advanceBudget;
+
+            let activeRolesSummary = [];
+            Object.keys(currentPlanData.roles).forEach(k => {
+                const r = currentPlanData.roles[k];
+                if (r.enabled && r.count > 0) {
+                    activeRolesSummary.push(`${r.count}x ${r.name}`);
+                }
+            });
+
+            const payload = {
+                booking_type: 'manpower',
+                title: `Custom Blueprint (${currentPlanData.type.toUpperCase()})`,
+                details: `${grandStaffText} [${activeRolesSummary.join(', ')}] • Expected Guests: ${currentPlanData.crowd} • ${currentPlanData.days} Day(s) • Total Budget: ₹${currentPlanData.totalBudget.toLocaleString('en-IN')} (50% Advance Token Paid)`,
+                booking_date: new Date().toISOString().split('T')[0],
+                total_price: advanceAmount
+            };
+
+            setTimeout(() => {
+                finalizePlanPayment(ebzActiveSession || `PAY-ADVANCE-${Date.now().toString().slice(-6)}`, payload);
+            }, 1000);
+        }
+
+        async function finalizePlanPayment(payRef, payload) {
+            if (pollTimer) clearInterval(pollTimer);
+            if (countdownTimer) clearInterval(countdownTimer);
+
+            document.getElementById('panel-card').style.display = 'none';
+            document.getElementById('panel-upi').style.display = 'block';
+            document.getElementById('ebz-scan-section').style.display = 'none';
+            document.getElementById('ebz-success-section').style.display = 'block';
+
+            await fetch('/api/payment/verify-and-book', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
+                body: JSON.stringify({
+                    ...payload,
+                    razorpay_payment_id: payRef
+                })
+            });
+
+            setTimeout(() => {
+                window.location.href = '/dashboard';
+            }, 1600);
+        }
+
+        function startTimer(duration) {
+            let timer = duration;
+            const display = document.getElementById('ebz-timer');
+            if (countdownTimer) clearInterval(countdownTimer);
+
+            countdownTimer = setInterval(() => {
+                let m = parseInt(timer / 60, 10);
+                let s = parseInt(timer % 60, 10);
+                display.textContent = `${m < 10 ? "0" + m : m}:${s < 10 ? "0" + s : s}`;
+                if (--timer < 0) {
+                    clearInterval(countdownTimer);
+                    closeEasebuzzModal();
+                }
+            }, 1000);
+        }
+
+        function closeEasebuzzModal() {
+            if (pollTimer) clearInterval(pollTimer);
+            if (countdownTimer) clearInterval(countdownTimer);
+            document.getElementById('evora-gateway-modal').style.display = 'none';
+        }
+    </script>
+</body>
+</html>

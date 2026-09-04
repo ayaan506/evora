@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Evora Pay Gateway</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Poppins', sans-serif; }
+        body { background: #f8fafc; min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 16px; }
+        .pay-card { background: #ffffff; border-radius: 24px; padding: 28px; width: 100%; max-width: 380px; box-shadow: 0 10px 30px rgba(0,0,0,0.06); text-align: center; }
+        .merchant-badge { display: inline-flex; align-items: center; gap: 8px; background: #ede9fe; color: #7c3aed; font-weight: 700; font-size: 13px; padding: 6px 14px; border-radius: 20px; margin-bottom: 20px; }
+        .amount-display { font-size: 38px; font-weight: 800; color: #0f172a; margin-bottom: 4px; }
+        .sub-text { font-size: 13px; color: #64748b; margin-bottom: 24px; }
+        .upi-badge-row { display: flex; justify-content: center; gap: 12px; margin-bottom: 28px; }
+        .upi-badge-row span { font-size: 11px; font-weight: 600; color: #475569; background: #f1f5f9; padding: 4px 10px; border-radius: 6px; }
+        .btn-pay-now { width: 100%; background: linear-gradient(135deg, #10b981, #059669); color: #fff; border: none; padding: 16px; border-radius: 14px; font-size: 16px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; box-shadow: 0 6px 20px rgba(16, 185, 129, 0.35); transition: transform 0.15s; }
+        .btn-pay-now:active { transform: scale(0.98); }
+
+        /* GPay Animated Success Screen */
+        .gpay-success-screen { display: none; text-align: center; padding: 30px 10px; }
+        .gpay-circle { width: 84px; height: 84px; border-radius: 50%; background: #10b981; color: #ffffff; display: inline-flex; align-items: center; justify-content: center; font-size: 40px; margin-bottom: 20px; box-shadow: 0 0 0 12px #ecfdf5; animation: scaleUpCheck 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
+        
+        @keyframes scaleUpCheck {
+            0% { transform: scale(0); opacity: 0; }
+            60% { transform: scale(1.15); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="pay-card">
+        
+        <!-- BEFORE PAYMENT -->
+        <div id="payment-prompt-box">
+            <div class="merchant-badge">
+                <i class="fa-solid fa-bolt"></i> EVORA LIVE CHECKOUT
+            </div>
+            <p class="sub-text">Paying to <strong>Evora Event Operations</strong></p>
+            
+            <div class="amount-display">₹{{ "{:,.2f}".format(amount) }}</div>
+            <p class="sub-text" style="font-size: 11px;">Ref: {{ session_id }}</p>
+
+            <div class="upi-badge-row">
+                <span>Google Pay</span>
+                <span>PhonePe</span>
+                <span>Paytm</span>
+                <span>BHIM</span>
+            </div>
+
+            <button id="btn-submit-pay" onclick="triggerMobilePayment()" class="btn-pay-now">
+                <i class="fa-solid fa-lock"></i> Pay ₹{{ "{:,.2f}".format(amount) }}
+            </button>
+            <p style="font-size: 11px; color: #94a3b8; margin-top: 14px;">Demo Gateway Simulator (No Real Money Deducted)</p>
+        </div>
+
+        <!-- AFTER PAYMENT (GPAY STYLE ANIMATION) -->
+        <div id="payment-success-box" class="gpay-success-screen">
+            <div class="gpay-circle">
+                <i class="fa-solid fa-check"></i>
+            </div>
+            <h2 style="font-size: 20px; font-weight: 700; color: #0f172a; margin-bottom: 6px;">Payment Successful!</h2>
+            <div style="font-size: 28px; font-weight: 800; color: #10b981; margin-bottom: 12px;">₹{{ "{:,.2f}".format(amount) }}</div>
+            <p style="font-size: 13px; color: #64748b;">Transaction completed. Your screen on the laptop has automatically refreshed with your passes!</p>
+        </div>
+
+    </div>
+
+    <script>
+        async function triggerMobilePayment() {
+            const btn = document.getElementById('btn-submit-pay');
+            btn.disabled = true;
+            btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Processing...`;
+
+            try {
+                const res = await fetch('/api/payment/confirm-mobile-pay/{{ session_id }}', { method: 'POST' });
+                const data = await res.json();
+
+                if (res.ok && data.status === 'success') {
+                    document.getElementById('payment-prompt-box').style.display = 'none';
+                    document.getElementById('payment-success-box').style.display = 'block';
+                } else {
+                    alert("Payment failed to process.");
+                    btn.disabled = false;
+                    btn.innerHTML = `<i class="fa-solid fa-lock"></i> Pay ₹{{ "{:,.2f}".format(amount) }}`;
+                }
+            } catch (err) {
+                alert("Connection lost with server.");
+            }
+        }
+    </script>
+</body>
+</html>

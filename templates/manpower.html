@@ -1,0 +1,794 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hire Event Manpower — Evora</title>
+    
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='images/E for evora.png') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='concerts.css') }}">
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Dependencies -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
+    <style>
+        /* =======================================================
+           MANPOWER PAGE LAYOUT REPAIR & CARD GRID
+        ======================================================= */
+        .manpower-page-container {
+            max-width: 1200px;
+            margin: 90px auto 60px auto;
+            padding: 0 24px;
+        }
+        .manpower-header-block {
+            margin-bottom: 30px;
+        }
+        .manpower-grid-layout {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+            gap: 24px;
+        }
+        .mp-card {
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 18px;
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.03);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .mp-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 24px rgba(0, 0, 0, 0.08);
+        }
+        .mp-header {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 14px;
+        }
+        .mp-icon-box {
+            width: 52px;
+            height: 52px;
+            border-radius: 14px;
+            background: #ede9fe;
+            color: #7c3aed;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+            flex-shrink: 0;
+        }
+        .mp-title-group h3 {
+            font-size: 17px;
+            font-weight: 700;
+            color: #0f172a;
+            margin: 0 0 4px 0;
+        }
+        .mp-rate-badge {
+            font-size: 13px;
+            color: #7c3aed;
+            font-weight: 600;
+        }
+        .mp-desc {
+            font-size: 13px;
+            color: #64748b;
+            line-height: 1.6;
+            margin: 0 0 16px 0;
+        }
+        .mp-checklist {
+            list-style: none;
+            padding: 0;
+            margin: 0 0 20px 0;
+        }
+        .mp-checklist li {
+            font-size: 12px;
+            color: #475569;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .mp-checklist li i {
+            color: #10b981;
+            font-size: 12px;
+        }
+        .btn-mp-hire {
+            width: 100%;
+            background: linear-gradient(135deg, #7c3aed, #db2777);
+            color: #ffffff;
+            border: none;
+            padding: 12px;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+        .btn-mp-hire:hover {
+            opacity: 0.95;
+        }
+
+        /* =======================================================
+           MANPOWER SELECTION POPUP MODAL
+        ======================================================= */
+        .mp-modal-backdrop {
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.7);
+            backdrop-filter: blur(4px);
+            z-index: 9999;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
+        }
+        .mp-modal-backdrop.active {
+            display: flex;
+        }
+        .mp-modal-box {
+            background: #ffffff;
+            border-radius: 20px;
+            width: 100%;
+            max-width: 460px;
+            padding: 28px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+            position: relative;
+        }
+        .mp-modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 18px;
+        }
+        .mp-modal-header h3 {
+            margin: 0;
+            font-size: 18px;
+            font-weight: 700;
+            color: #0f172a;
+        }
+        .mp-close-btn {
+            background: #f1f5f9;
+            border: none;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            cursor: pointer;
+            color: #64748b;
+        }
+
+        /* =======================================================
+           SCOPED EASEBUZZ GATEWAY MODAL
+        ======================================================= */
+        .ebz-scoped-overlay {
+            position: fixed;
+            inset: 0;
+            background: linear-gradient(135deg, rgba(15, 23, 42, 0.85), rgba(30, 27, 75, 0.85));
+            z-index: 99999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(8px);
+            padding: 20px;
+        }
+        .ebz-scoped-wrapper {
+            width: 100%;
+            max-width: 820px;
+        }
+        .ebz-scoped-card {
+            background: #ffffff;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.35);
+        }
+        .ebz-scoped-banner {
+            background: #3b49df;
+            padding: 18px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: #ffffff;
+        }
+        .ebz-scoped-body {
+            display: flex;
+            min-height: 380px;
+        }
+        .ebz-scoped-sidebar {
+            width: 42%;
+            border-right: 1px solid #e2e8f0;
+            padding: 20px 16px;
+            background: #ffffff;
+        }
+        .ebz-scoped-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 12px;
+            border-radius: 12px;
+            cursor: pointer;
+            margin-bottom: 4px;
+        }
+        .ebz-scoped-item.active {
+            background: #eff6ff;
+            border: 1px solid #bfdbfe;
+        }
+        .ebz-scoped-content {
+            width: 58%;
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            background: #ffffff;
+        }
+        .ebz-scoped-qr {
+            padding: 12px;
+            background: #ffffff;
+            border: 2px solid #e2e8f0;
+            border-radius: 14px;
+            display: inline-block;
+        }
+        .ebz-scoped-pay-btn {
+            width: 100%;
+            background: #059669;
+            color: #ffffff;
+            border: none;
+            padding: 14px;
+            border-radius: 10px;
+            font-size: 15px;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        .ebz-pulse-success {
+            width: 76px;
+            height: 76px;
+            border-radius: 50%;
+            background: #10b981;
+            color: #ffffff;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 36px;
+            margin-bottom: 12px;
+            box-shadow: 0 0 0 10px #ecfdf5;
+            animation: mpPulse 1.2s infinite;
+        }
+        @keyframes mpPulse {
+            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4); }
+            70% { transform: scale(1); box-shadow: 0 0 0 14px rgba(16, 185, 129, 0); }
+            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+        }
+    </style>
+</head>
+<body class="light-theme">
+
+    <!-- NAVIGATION BAR -->
+    <nav class="light-nav">
+        <a href="/" class="nav-logo-group" style="display: flex; align-items: center; gap: 10px; text-decoration: none;">
+            <div class="nav-logo-spacer" style="width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; overflow: visible;">
+                <img src="{{ url_for('static', filename='images/E for evora.png') }}" alt="Evora" class="nav-branded-logo-img" style="width: 100%; height: 100%; object-fit: contain; transform: scale(1.10);" onerror="this.style.display='none'">
+            </div>  
+            <span class="nav-logo-text" style="font-size: 24px; font-weight: 700;">evora</span>
+        </a>
+        <div class="light-nav-links">
+            <a href="/events">Events</a>
+            <a href="/venues">Venues</a>
+            <a href="/manpower" class="active">Hire Staff</a>
+            <a href="/planner">Plan My Event</a>
+            <a href="/contact">Contact</a>
+        </div>
+        <div class="light-nav-actions" id="nav-actions-logged-out">
+            <a href="/login" class="btn-light-login">Login</a>
+            <a href="/signup" class="btn-light-signup">Sign Up</a>
+        </div>
+        <div class="light-nav-actions" id="nav-actions-logged-in" style="display: none;">
+            <a href="/dashboard" class="btn-light-signup">
+                <i class="fa-solid fa-user"></i> My Dashboard
+            </a>
+        </div>
+    </nav>
+
+    <!-- MAIN PAGE CONTAINER -->
+    <main class="manpower-page-container">
+        
+        <div class="manpower-header-block">
+            <h1 class="hub-title" style="margin: 0 0 6px 0;">Book On-Demand <span class="gradient-text">Event Manpower</span></h1>
+            <p style="margin: 0; color: #64748b; font-size: 14px;">Verified, trained event crew, supervisors, waiters, and handlers for your events in Pune & Mumbai.</p>
+        </div>
+
+        <!-- 6 MANPOWER CARDS GRID -->
+        <div class="manpower-grid-layout">
+            
+            <!-- 1. Waiters -->
+            <div class="mp-card">
+                <div>
+                    <div class="mp-header">
+                        <div class="mp-icon-box"><i class="fa-solid fa-bell-concierge"></i></div>
+                        <div class="mp-title-group">
+                            <h3>Event Waiters & Servers</h3>
+                            <span class="mp-rate-badge">₹ 350 / hr per head</span>
+                        </div>
+                    </div>
+                    <p class="mp-desc">Professional, uniformed banquet waiters and table servers experienced in high-end catering and guest service.</p>
+                    <ul class="mp-checklist">
+                        <li><i class="fa-solid fa-check"></i> Formal Black/White Uniform</li>
+                        <li><i class="fa-solid fa-check"></i> Food & Beverage Service Trained</li>
+                        <li><i class="fa-solid fa-check"></i> Hygiene Verified Staff</li>
+                    </ul>
+                </div>
+                <button class="btn-mp-hire" onclick="openBookingModal('Event Waiters', 350)">Book Staff</button>
+            </div>
+
+            <!-- 2. Supervisors -->
+            <div class="mp-card">
+                <div>
+                    <div class="mp-header">
+                        <div class="mp-icon-box"><i class="fa-solid fa-user-tie"></i></div>
+                        <div class="mp-title-group">
+                            <h3>Event Supervisor</h3>
+                            <span class="mp-rate-badge">₹ 600 / hr per head</span>
+                        </div>
+                    </div>
+                    <p class="mp-desc">Experienced crowd and operations managers to oversee floor staff, timeline execution, and VIP hospitality.</p>
+                    <ul class="mp-checklist">
+                        <li><i class="fa-solid fa-check"></i> Floor Staff Management</li>
+                        <li><i class="fa-solid fa-check"></i> On-Site Troubleshooting</li>
+                        <li><i class="fa-solid fa-check"></i> Vendor & Schedule Coordination</li>
+                    </ul>
+                </div>
+                <button class="btn-mp-hire" onclick="openBookingModal('Event Supervisor', 600)">Book Staff</button>
+            </div>
+
+            <!-- 3. Handlers -->
+            <div class="mp-card">
+                <div>
+                    <div class="mp-header">
+                        <div class="mp-icon-box"><i class="fa-solid fa-hands-holding-child"></i></div>
+                        <div class="mp-title-group">
+                            <h3>Event Handlers & Crew</h3>
+                            <span class="mp-rate-badge">₹ 300 / hr per head</span>
+                        </div>
+                    </div>
+                    <p class="mp-desc">Energetic stagehands and logistics crew to assist with setup, registration desks, seating management, and teardown.</p>
+                    <ul class="mp-checklist">
+                        <li><i class="fa-solid fa-check"></i> Stage & Setup Assistance</li>
+                        <li><i class="fa-solid fa-check"></i> Registration Desk Management</li>
+                        <li><i class="fa-solid fa-check"></i> Logistics & Merchandise Crew</li>
+                    </ul>
+                </div>
+                <button class="btn-mp-hire" onclick="openBookingModal('Event Handlers', 300)">Book Staff</button>
+            </div>
+
+            <!-- 4. Bartenders -->
+            <div class="mp-card">
+                <div>
+                    <div class="mp-header">
+                        <div class="mp-icon-box"><i class="fa-solid fa-martini-glass-citrus"></i></div>
+                        <div class="mp-title-group">
+                            <h3>Certified Bartenders</h3>
+                            <span class="mp-rate-badge">₹ 750 / hr per head</span>
+                        </div>
+                    </div>
+                    <p class="mp-desc">Skilled mixologists and flair bartenders for cocktail bars, private parties, and wedding receptions.</p>
+                    <ul class="mp-checklist">
+                        <li><i class="fa-solid fa-check"></i> Cocktail & Mocktail Mixology</li>
+                        <li><i class="fa-solid fa-check"></i> Bar Counter Setup & Management</li>
+                        <li><i class="fa-solid fa-check"></i> Clean & Fast Service</li>
+                    </ul>
+                </div>
+                <button class="btn-mp-hire" onclick="openBookingModal('Certified Bartender', 750)">Book Staff</button>
+            </div>
+
+            <!-- 5. Security & Bouncers -->
+            <div class="mp-card">
+                <div>
+                    <div class="mp-header">
+                        <div class="mp-icon-box"><i class="fa-solid fa-shield-halved"></i></div>
+                        <div class="mp-title-group">
+                            <h3>Event Security & Bouncers</h3>
+                            <span class="mp-rate-badge">₹ 500 / hr per head</span>
+                        </div>
+                    </div>
+                    <p class="mp-desc">Trained physical security personnel for entry door checks, VIP protection, and crowd control management.</p>
+                    <ul class="mp-checklist">
+                        <li><i class="fa-solid fa-check"></i> Entry & Pass Verification</li>
+                        <li><i class="fa-solid fa-check"></i> VIP Escort & Protection</li>
+                        <li><i class="fa-solid fa-check"></i> Trained Crowd Management</li>
+                    </ul>
+                </div>
+                <button class="btn-mp-hire" onclick="openBookingModal('Security Guard / Bouncer', 500)">Book Staff</button>
+            </div>
+
+            <!-- 6. Valet Drivers -->
+            <div class="mp-card">
+                <div>
+                    <div class="mp-header">
+                        <div class="mp-icon-box"><i class="fa-solid fa-car"></i></div>
+                        <div class="mp-title-group">
+                            <h3>Valet Drivers</h3>
+                            <span class="mp-rate-badge">₹ 400 / hr per head</span>
+                        </div>
+                    </div>
+                    <p class="mp-desc">Licensed, professional valet drivers to ensure smooth parking operations for arriving guests at your venue.</p>
+                    <ul class="mp-checklist">
+                        <li><i class="fa-solid fa-check"></i> Valid Driver License Verified</li>
+                        <li><i class="fa-solid fa-check"></i> Parking Token System Provided</li>
+                        <li><i class="fa-solid fa-check"></i> Safe Vehicle Management</li>
+                    </ul>
+                </div>
+                <button class="btn-mp-hire" onclick="openBookingModal('Valet Driver', 400)">Book Staff</button>
+            </div>
+
+        </div>
+
+    </main>
+
+    <!-- STEP 1: MANPOWER SELECTION MODAL -->
+    <div class="mp-modal-backdrop" id="manpower-modal">
+        <div class="mp-modal-box">
+            <div class="mp-modal-header">
+                <h3 id="modal-role-name">Book Event Manpower</h3>
+                <button class="mp-close-btn" onclick="closeModal()">✕</button>
+            </div>
+
+            <form onsubmit="proceedToEasebuzzPayment(event)">
+                <div class="form-group" style="margin-bottom: 12px;">
+                    <label style="display:block; font-size:12px; font-weight:600; color:#334155; margin-bottom:4px;">Event Date & Start Time</label>
+                    <input type="datetime-local" id="input-datetime" class="form-input" required style="width:100%; padding:10px; border:1px solid #cbd5e1; border-radius:8px; box-sizing:border-box;">
+                </div>
+                <div class="form-group" style="margin-bottom: 12px;">
+                    <label style="display:block; font-size:12px; font-weight:600; color:#334155; margin-bottom:4px;">Event Venue Address</label>
+                    <input type="text" id="input-venue" class="form-input" placeholder="e.g., Westin Hotel, Koregaon Park, Pune" required style="width:100%; padding:10px; border:1px solid #cbd5e1; border-radius:8px; box-sizing:border-box;">
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px;">
+                    <div>
+                        <label style="display:block; font-size:12px; font-weight:600; color:#334155; margin-bottom:4px;"><i class="fa-solid fa-person" style="color:#3b82f6;"></i> Male Staff</label>
+                        <input type="number" id="input-male" class="form-input" value="1" min="0" max="50" onchange="calculateTotal()" onkeyup="calculateTotal()" required style="width:100%; padding:10px; border:1px solid #cbd5e1; border-radius:8px; box-sizing:border-box;">
+                    </div>
+                    <div>
+                        <label style="display:block; font-size:12px; font-weight:600; color:#334155; margin-bottom:4px;"><i class="fa-solid fa-person-dress" style="color:#ec4899;"></i> Female Staff</label>
+                        <input type="number" id="input-female" class="form-input" value="1" min="0" max="50" onchange="calculateTotal()" onkeyup="calculateTotal()" required style="width:100%; padding:10px; border:1px solid #cbd5e1; border-radius:8px; box-sizing:border-box;">
+                    </div>
+                </div>
+
+                <div class="form-group" style="margin-bottom: 16px;">
+                    <label style="display:block; font-size:12px; font-weight:600; color:#334155; margin-bottom:4px;">Shift Duration (Hours)</label>
+                    <input type="number" id="input-hours" class="form-input" value="4" min="2" max="24" onchange="calculateTotal()" onkeyup="calculateTotal()" required style="width:100%; padding:10px; border:1px solid #cbd5e1; border-radius:8px; box-sizing:border-box;">
+                </div>
+
+                <!-- PRICE CALCULATION SUMMARY -->
+                <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:12px; padding:14px; margin-bottom:18px;">
+                    <div style="display:flex; justify-content:space-between; font-size:13px; color:#334155; margin-bottom:6px;">
+                        <span>Rate per person</span>
+                        <span id="summary-rate" style="font-weight:600;">₹ 350 / hr</span>
+                    </div>
+                    <div style="display:flex; justify-content:space-between; font-size:11px; color:#64748b; margin-bottom:6px;">
+                        <span>Base Total (<span id="summary-calc-text">2 Staff × 4 Hrs</span>)</span>
+                        <span id="summary-basetotal">₹ 2,800</span>
+                    </div>
+                    <div style="display:flex; justify-content:space-between; font-size:11px; color:#64748b; margin-bottom:6px;">
+                        <span>Supervisor Dispatch Fee</span>
+                        <span>₹ 250</span>
+                    </div>
+                    <hr style="border:none; border-top:1px solid #e2e8f0; margin:6px 0;">
+                    <div style="display:flex; justify-content:space-between; font-size:15px; font-weight:700; color:#7c3aed;">
+                        <span>Total Payable</span>
+                        <span id="summary-grandtotal">₹ 3,050</span>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn-mp-hire" style="padding:14px;">Proceed to Easebuzz Payment →</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- STEP 2: EASEBUZZ POPUP GATEWAY -->
+    <div id="evora-gateway-modal" class="ebz-scoped-overlay" style="display: none;">
+        <div class="ebz-scoped-wrapper">
+            
+            <div style="display: flex; justify-content: space-between; align-items: center; color: #fff; margin-bottom: 12px; font-size: 13px;">
+                <button type="button" onclick="closeEasebuzzModal()" style="background:transparent; border:none; color:#fff; cursor:pointer; font-size:13px;">
+                    <i class="fa-solid fa-xmark"></i> Cancel
+                </button>
+                <div><i class="fa-solid fa-globe"></i> English</div>
+            </div>
+
+            <div class="ebz-scoped-card">
+                
+                <div class="ebz-scoped-banner">
+                    <div style="display:flex; align-items:center; gap:12px;">
+                        <div style="width:40px; height:40px; background:#fff; border-radius:8px; display:flex; align-items:center; justify-content:center;">
+                            <img src="{{ url_for('static', filename='images/E for evora.png') }}" style="width:85%;" onerror="this.style.display='none'" alt="Evora">
+                        </div>
+                        <div>
+                            <div style="font-size:15px; font-weight:600;">https://evora.live/checkout/</div>
+                            <div style="font-size:11px; opacity:0.85;">Tr ID <span id="ebz-tr-id">---</span></div>
+                        </div>
+                    </div>
+                    <div style="background:rgba(15,23,42,0.35); padding:6px 14px; border-radius:20px; font-size:12px;">
+                        <span>Valid For</span> <strong id="ebz-timer">14:59</strong>
+                    </div>
+                </div>
+
+                <div class="ebz-scoped-body">
+                    
+                    <div class="ebz-scoped-sidebar">
+                        <div style="font-size:12px; font-weight:600; color:#64748b; margin-bottom:12px;">Payment Method</div>
+                        <div class="ebz-scoped-item active" id="item-tab-upi" onclick="switchTab('upi')">
+                            <i class="fa-solid fa-qrcode" style="font-size:16px; color:#3b49df;"></i>
+                            <div style="flex:1;">
+                                <div style="font-size:13px; font-weight:600; color:#0f172a;">UPI / QR Code</div>
+                                <div style="font-size:11px; color:#059669; font-weight:600;">Instant QR Approval</div>
+                            </div>
+                        </div>
+                        <div class="ebz-scoped-item" id="item-tab-card" onclick="switchTab('card')">
+                            <i class="fa-regular fa-credit-card" style="font-size:16px; color:#64748b;"></i>
+                            <div style="flex:1;">
+                                <div style="font-size:13px; font-weight:600; color:#0f172a;">Credit / Debit Card</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="ebz-scoped-content">
+                        
+                        <!-- TAB 1: UPI / SCANNER -->
+                        <div id="panel-upi" style="display: block;">
+                            <div id="ebz-scan-section" style="text-align:center;">
+                                <div style="font-size:14px; font-weight:600; color:#0f172a; margin-bottom:4px;">Scan QR with any UPI App</div>
+                                <p style="font-size:11px; color:#64748b; margin:0 0 12px 0;">Google Pay • PhonePe • Paytm • BHIM</p>
+                                <div class="ebz-scoped-qr">
+                                    <div id="ebz-qrcode-canvas"></div>
+                                </div>
+                                <div style="font-size:12px; color:#7c3aed; font-weight:600; margin-top:10px;">
+                                    <i class="fa-solid fa-circle-notch fa-spin"></i> Awaiting phone authorization...
+                                </div>
+                            </div>
+
+                            <div id="ebz-success-section" style="display:none; text-align:center; padding:20px 0;">
+                                <div class="ebz-pulse-success"><i class="fa-solid fa-check"></i></div>
+                                <h3 style="font-size:18px; font-weight:700; color:#0f172a; margin:0 0 4px 0;">Payment Approved!</h3>
+                                <p style="font-size:12px; color:#059669; font-weight:600; margin:0;">Staff dispatched successfully. Redirecting...</p>
+                            </div>
+                        </div>
+
+                        <!-- TAB 2: CARD -->
+                        <div id="panel-card" style="display: none;">
+                            <div style="font-size:13px; font-weight:600; color:#0f172a; margin-bottom:10px;">Enter Card Details</div>
+                            <input type="text" value="4532 •••• •••• 8920" style="width:100%; padding:10px; border:1px solid #cbd5e1; border-radius:8px; margin-bottom:8px; box-sizing:border-box;">
+                            <div style="display:flex; gap:8px;">
+                                <input type="text" value="08/29" style="width:50%; padding:10px; border:1px solid #cbd5e1; border-radius:8px; box-sizing:border-box;">
+                                <input type="password" value="•••" style="width:50%; padding:10px; border:1px solid #cbd5e1; border-radius:8px; box-sizing:border-box;">
+                            </div>
+                        </div>
+
+                        <div style="margin-top: auto;">
+                            <button id="ebz-btn-pay" onclick="simulateManualPayment()" class="ebz-scoped-pay-btn">
+                                <i class="fa-solid fa-shield-halved"></i> Pay <span id="ebz-pay-amount">₹0.00</span>
+                            </button>
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <div style="background:#f8fafc; border-top:1px solid #e2e8f0; padding:12px 24px; display:flex; justify-content:space-between; font-size:12px; color:#64748b;">
+                    <div><i class="fa-brands fa-cc-visa"></i> VISA &bull; <i class="fa-brands fa-cc-mastercard"></i> MasterCard</div>
+                    <div>Powered By <strong>Easebuzz</strong></div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- SCRIPTS -->
+    <script>
+        let selectedRate = 350;
+        let selectedRole = '';
+        let currentPayload = null;
+        let ebzActiveSession = null;
+        let pollTimer = null;
+        let countdownTimer = null;
+
+        window.addEventListener('DOMContentLoaded', () => {
+            const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
+            const loggedOutNav = document.getElementById('nav-actions-logged-out');
+            const loggedInNav = document.getElementById('nav-actions-logged-in');
+
+            if (isLoggedIn) {
+                if (loggedOutNav) loggedOutNav.style.display = 'none';
+                if (loggedInNav) loggedInNav.style.display = 'flex';
+            }
+        });
+
+        function openBookingModal(roleName, hourlyRate) {
+            selectedRole = roleName;
+            selectedRate = hourlyRate;
+            document.getElementById('modal-role-name').innerText = `Hire ${roleName}`;
+            document.getElementById('summary-rate').innerText = `₹ ${hourlyRate} / hr`;
+            calculateTotal();
+            document.getElementById('manpower-modal').classList.add('active');
+        }
+
+        function closeModal() {
+            document.getElementById('manpower-modal').classList.remove('active');
+        }
+
+        function calculateTotal() {
+            const male = parseInt(document.getElementById('input-male').value) || 0;
+            const female = parseInt(document.getElementById('input-female').value) || 0;
+            const totalPersons = male + female;
+            const hours = parseInt(document.getElementById('input-hours').value) || 1;
+
+            const baseTotal = totalPersons * hours * selectedRate;
+            const grandTotal = totalPersons > 0 ? baseTotal + 250 : 0;
+
+            document.getElementById('summary-calc-text').innerText = `${totalPersons} Staff (${male}M, ${female}F) × ${hours} Hr(s)`;
+            document.getElementById('summary-basetotal').innerText = `₹ ${baseTotal.toLocaleString('en-IN')}`;
+            document.getElementById('summary-grandtotal').innerText = `₹ ${grandTotal.toLocaleString('en-IN')}`;
+        }
+
+        async function proceedToEasebuzzPayment(e) {
+            e.preventDefault();
+
+            const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
+            if (!isLoggedIn) {
+                alert("⚠️ Please log in to your Evora account before hiring crew staff.");
+                window.location.href = '/login';
+                return;
+            }
+
+            const dateTime = document.getElementById('input-datetime').value;
+            const venueAddress = document.getElementById('input-venue').value.trim();
+            const male = parseInt(document.getElementById('input-male').value) || 0;
+            const female = parseInt(document.getElementById('input-female').value) || 0;
+            const totalPersons = male + female;
+            const hours = parseInt(document.getElementById('input-hours').value) || 1;
+
+            if (totalPersons === 0) {
+                alert("Please specify at least 1 male or female staff member.");
+                return;
+            }
+
+            const baseTotal = totalPersons * hours * selectedRate;
+            const grandTotal = baseTotal + 250;
+
+            currentPayload = {
+                booking_type: 'manpower',
+                title: `Event Crew: ${selectedRole}`,
+                details: `${totalPersons} Staff (${male} Male, ${female} Female) • ${hours} Hr Shift • Venue: ${venueAddress}`,
+                booking_date: dateTime ? dateTime.replace('T', ' ') : 'Upcoming Event Date',
+                total_price: grandTotal
+            };
+
+            closeModal();
+
+            try {
+                const res = await fetch('/api/payment/create-qr-session', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify(currentPayload)
+                });
+                const data = await res.json();
+
+                if (!res.ok || data.status !== 'success') {
+                    alert(data.message || "Could not start payment session.");
+                    return;
+                }
+
+                ebzActiveSession = data.session_id;
+                document.getElementById('ebz-tr-id').innerText = ebzActiveSession;
+                document.getElementById('ebz-pay-amount').innerText = `₹${grandTotal.toLocaleString('en-IN', {minimumFractionDigits: 2})}`;
+
+                const qrBox = document.getElementById('ebz-qrcode-canvas');
+                qrBox.innerHTML = '';
+                document.getElementById('ebz-scan-section').style.display = 'block';
+                document.getElementById('ebz-success-section').style.display = 'none';
+
+                new QRCode(qrBox, {
+                    text: data.pay_url,
+                    width: 160,
+                    height: 160,
+                    colorDark: "#0f172a",
+                    colorLight: "#ffffff",
+                    correctLevel: QRCode.CorrectLevel.H
+                });
+
+                startTimer(14 * 60 + 59);
+                document.getElementById('evora-gateway-modal').style.display = 'flex';
+
+                if (pollTimer) clearInterval(pollTimer);
+                pollTimer = setInterval(async () => {
+                    try {
+                        const checkRes = await fetch(`/api/payment/check-status/${ebzActiveSession}`);
+                        const checkData = await checkRes.json();
+                        if (checkData.status === 'PAID') {
+                            clearInterval(pollTimer);
+                            finalizeOrder(ebzActiveSession);
+                        }
+                    } catch (err) {
+                        console.error(err);
+                    }
+                }, 1500);
+
+            } catch (err) {
+                alert("Connection failed with payment gateway.");
+            }
+        }
+
+        function switchTab(type) {
+            document.getElementById('item-tab-upi').classList.toggle('active', type === 'upi');
+            document.getElementById('item-tab-card').classList.toggle('active', type === 'card');
+            document.getElementById('panel-upi').style.display = type === 'upi' ? 'block' : 'none';
+            document.getElementById('panel-card').style.display = type === 'card' ? 'block' : 'none';
+        }
+
+        async function simulateManualPayment() {
+            const btn = document.getElementById('ebz-btn-pay');
+            btn.disabled = true;
+            btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Authorizing...`;
+
+            setTimeout(() => {
+                finalizeOrder(ebzActiveSession || `PAY-MANUAL-${Date.now().toString().slice(-6)}`);
+            }, 1000);
+        }
+
+        async function finalizeOrder(payRef) {
+            if (pollTimer) clearInterval(pollTimer);
+            if (countdownTimer) clearInterval(countdownTimer);
+
+            document.getElementById('panel-card').style.display = 'none';
+            document.getElementById('panel-upi').style.display = 'block';
+            document.getElementById('ebz-scan-section').style.display = 'none';
+            document.getElementById('ebz-success-section').style.display = 'block';
+
+            await fetch('/api/payment/verify-and-book', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
+                body: JSON.stringify({
+                    ...currentPayload,
+                    razorpay_payment_id: payRef
+                })
+            });
+
+            setTimeout(() => {
+                window.location.href = '/dashboard';
+            }, 1600);
+        }
+
+        function startTimer(duration) {
+            let timer = duration;
+            const display = document.getElementById('ebz-timer');
+            if (countdownTimer) clearInterval(countdownTimer);
+
+            countdownTimer = setInterval(() => {
+                let m = parseInt(timer / 60, 10);
+                let s = parseInt(timer % 60, 10);
+                display.textContent = `${m < 10 ? "0" + m : m}:${s < 10 ? "0" + s : s}`;
+                if (--timer < 0) {
+                    clearInterval(countdownTimer);
+                    closeEasebuzzModal();
+                }
+            }, 1000);
+        }
+
+        function closeEasebuzzModal() {
+            if (pollTimer) clearInterval(pollTimer);
+            if (countdownTimer) clearInterval(countdownTimer);
+            document.getElementById('evora-gateway-modal').style.display = 'none';
+        }
+    </script>
+</body>
+</html>

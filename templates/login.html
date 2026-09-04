@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login — Evora</title>
+    
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='images/E for evora.png') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='concerts.css') }}">
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        .auth-wrapper {
+            min-height: calc(100vh - 80px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 24px;
+            margin-top: 60px;
+        }
+        .auth-card {
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 20px;
+            width: 100%;
+            max-width: 420px;
+            padding: 36px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.04);
+        }
+        .auth-header {
+            text-align: center;
+            margin-bottom: 24px;
+        }
+        .auth-header h1 {
+            font-size: 24px;
+            font-weight: 700;
+            color: #0f172a;
+            margin: 0 0 6px 0;
+        }
+        .auth-header p {
+            font-size: 13px;
+            color: #64748b;
+            margin: 0;
+        }
+        .form-group {
+            margin-bottom: 16px;
+        }
+        .form-group label {
+            display: block;
+            font-size: 12px;
+            font-weight: 600;
+            color: #334155;
+            margin-bottom: 6px;
+        }
+        .btn-auth-submit {
+            width: 100%;
+            background: linear-gradient(135deg, #7c3aed, #db2777);
+            color: #ffffff;
+            border: none;
+            padding: 13px;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: opacity 0.2s, transform 0.15s;
+            margin-top: 8px;
+        }
+        .btn-auth-submit:hover {
+            opacity: 0.95;
+            transform: translateY(-1px);
+        }
+        .auth-alert-box {
+            background: #fee2e2;
+            border: 1px solid #fca5a5;
+            color: #b91c1c;
+            padding: 10px 14px;
+            border-radius: 8px;
+            font-size: 12px;
+            margin-bottom: 16px;
+            display: none;
+        }
+    </style>
+</head>
+<body class="light-theme">
+
+    <nav class="light-nav">
+        <a href="/" class="nav-logo-group" style="display: flex; align-items: center; gap: 10px; text-decoration: none;">
+            <div class="nav-logo-spacer" style="width: 44px; height: 44px; display: flex; align-items: center; justify-content: center;">
+                <img src="{{ url_for('static', filename='images/E for evora.png') }}" alt="Evora" class="nav-branded-logo-img" style="width: 100%; height: 100%; object-fit: contain;">
+            </div>  
+            <span class="nav-logo-text" style="font-size: 24px; font-weight: 700;">evora</span>
+        </a>
+        <div class="light-nav-links">
+            <a href="/events">Events</a>
+            <a href="/planner">Plan My Event</a>
+            <a href="/manpower">Hire Staff</a>
+            <a href="/venues">Venues</a>
+            <a href="/contact">Contact</a>
+        </div>
+        <div class="light-nav-actions">
+            <a href="/signup" class="btn-light-signup">Sign Up</a>
+        </div>
+    </nav>
+
+    <div class="auth-wrapper">
+        <div class="auth-card">
+            
+            <div class="auth-header">
+                <h1>Welcome Back</h1>
+                <p>Sign in to manage your passes, plans & allocations</p>
+            </div>
+
+            <div id="login-error-alert" class="auth-alert-box"></div>
+
+            <form onsubmit="handleUserLogin(event)">
+                <div class="form-group">
+                    <label>Email Address</label>
+                    <input type="email" id="login-email" class="form-input" placeholder="name@example.com" autocomplete="email" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Password</label>
+                    <input type="password" id="login-password" class="form-input" placeholder="Enter your password" autocomplete="current-password" required>
+                </div>
+
+                <button type="submit" id="btn-login-submit" class="btn-auth-submit">
+                    Sign In <i class="fa-solid fa-arrow-right"></i>
+                </button>
+            </form>
+
+            <div style="text-align: center; margin-top: 20px; font-size: 13px; color: #64748b;">
+                Don't have an account? <a href="/signup" style="color: #7c3aed; font-weight: 600; text-decoration: none;">Sign Up</a>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        window.addEventListener('DOMContentLoaded', () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.has('logged_out')) {
+                localStorage.clear();
+                sessionStorage.clear();
+            }
+        });
+
+        async function handleUserLogin(e) {
+            e.preventDefault();
+
+            const email = document.getElementById('login-email').value.trim().toLowerCase();
+            const password = document.getElementById('login-password').value;
+            const errorBox = document.getElementById('login-error-alert');
+            const submitBtn = document.getElementById('btn-login-submit');
+
+            errorBox.style.display = 'none';
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Authenticating...`;
+
+            try {
+                const res = await fetch('/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify({ email, password })
+                });
+                const data = await res.json();
+
+                if (res.ok && data.status === 'success') {
+                    // Reset existing storage and store active session attributes
+                    localStorage.clear();
+                    localStorage.setItem('isLoggedIn', 'true');
+                    localStorage.setItem('userEmail', data.email);
+                    localStorage.setItem('userName', data.fullname);
+                    localStorage.setItem('isAdmin', data.is_admin ? 'true' : 'false');
+
+                    if (data.is_admin) {
+                        window.location.href = '/admin';
+                    } else {
+                        window.location.href = '/dashboard';
+                    }
+                } else {
+                    errorBox.innerText = data.message || "Invalid email or password.";
+                    errorBox.style.display = 'block';
+                }
+            } catch (err) {
+                errorBox.innerText = "Connection error. Could not reach server.";
+                errorBox.style.display = 'block';
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = `Sign In <i class="fa-solid fa-arrow-right"></i>`;
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,262 @@
+/* EASEBUZZ SHARED MODAL */
+.ebz-overlay {
+    position: fixed;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(15, 23, 42, 0.85), rgba(30, 27, 75, 0.85));
+    z-index: 99999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(8px);
+    padding: 20px;
+}
+.ebz-wrapper {
+    width: 100%;
+    max-width: 820px;
+    animation: ebzZoom 0.25s ease-out;
+}
+.ebz-top-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: #ffffff;
+    margin-bottom: 12px;
+    font-size: 13px;
+}
+.ebz-btn-cancel {
+    background: transparent;
+    border: none;
+    color: #ffffff;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+.ebz-lang-select {
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+.ebz-card {
+    background: #ffffff;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.35);
+}
+.ebz-purple-banner {
+    background: #3b49df;
+    padding: 18px 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: #ffffff;
+}
+.ebz-merchant-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+.ebz-merchant-logo {
+    width: 44px;
+    height: 44px;
+    background: #ffffff;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 4px;
+}
+.ebz-merchant-logo img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+.ebz-merchant-url {
+    font-size: 15px;
+    font-weight: 600;
+    letter-spacing: -0.2px;
+}
+.ebz-tr-id {
+    font-size: 12px;
+    opacity: 0.85;
+}
+.ebz-timer-badge {
+    background: rgba(15, 23, 42, 0.35);
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.ebz-timer-badge strong {
+    font-size: 14px;
+    color: #ffffff;
+}
+.ebz-body {
+    display: flex;
+    min-height: 380px;
+}
+.ebz-sidebar {
+    width: 42%;
+    border-right: 1px solid #e2e8f0;
+    padding: 20px 16px;
+    background: #ffffff;
+}
+.ebz-sidebar-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: #64748b;
+    margin-bottom: 12px;
+    padding-left: 8px;
+}
+.ebz-method-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 12px;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: background 0.15s;
+    margin-bottom: 4px;
+}
+.ebz-method-item:hover { background: #f8fafc; }
+.ebz-method-item.active { background: #eff6ff; border: 1px solid #bfdbfe; }
+.ebz-method-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    background: #f1f5f9;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #334155;
+    font-size: 14px;
+}
+.ebz-method-item.active .ebz-method-icon { background: #3b49df; color: #ffffff; }
+.ebz-method-content { flex: 1; }
+.ebz-method-name { font-size: 13px; font-weight: 600; color: #0f172a; }
+.ebz-offer-badge { font-size: 11px; color: #059669; font-weight: 600; }
+.ebz-partner-logos { display: flex; align-items: center; gap: 6px; font-size: 14px; color: #64748b; }
+.ebz-content-panel {
+    width: 58%;
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    background: #ffffff;
+}
+.ebz-offer-strip {
+    background: #fffbeb;
+    border: 1px solid #fde68a;
+    border-radius: 10px;
+    padding: 10px 14px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+    font-size: 12px;
+    color: #92400e;
+}
+.ebz-badge-h {
+    background: #f59e0b;
+    color: #ffffff;
+    font-weight: 700;
+    font-size: 10px;
+    padding: 2px 6px;
+    border-radius: 4px;
+    margin-right: 6px;
+}
+.ebz-btn-apply { background: transparent; border: none; color: #3b49df; font-weight: 700; cursor: pointer; }
+.ebz-qr-frame {
+    padding: 12px;
+    background: #ffffff;
+    border: 2px solid #e2e8f0;
+    border-radius: 14px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+    display: inline-block;
+}
+.ebz-form-group { display: flex; gap: 10px; }
+.ebz-input {
+    width: 100%;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    padding: 10px 12px;
+    font-size: 13px;
+    outline: none;
+}
+.ebz-input-card-box {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    padding: 0 12px;
+    width: 100%;
+}
+.ebz-input-card-box input { border: none; padding: 10px 0; outline: none; width: 100%; font-size: 13px; }
+.ebz-bank-pill {
+    border: 1px solid #e2e8f0;
+    background: #f8fafc;
+    padding: 8px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 600;
+    color: #334155;
+    cursor: pointer;
+}
+.ebz-bank-pill.active { border-color: #3b49df; background: #eff6ff; color: #3b49df; }
+.ebz-footer-action { margin-top: auto; padding-top: 16px; }
+.ebz-pay-btn {
+    width: 100%;
+    background: #e2e8f0;
+    color: #475569;
+    border: none;
+    padding: 14px;
+    border-radius: 10px;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: background 0.2s;
+}
+.ebz-pay-btn.ready { background: #059669; color: #ffffff; box-shadow: 0 4px 14px rgba(5, 150, 105, 0.3); }
+.ebz-charges-note { text-align: center; font-size: 11px; color: #94a3b8; margin-top: 8px; }
+.ebz-modal-footer {
+    background: #f8fafc;
+    border-top: 1px solid #e2e8f0;
+    padding: 12px 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 12px;
+    color: #64748b;
+}
+.ebz-footer-badges { display: flex; gap: 14px; }
+.ebz-gpay-success { text-align: center; padding: 24px 0; }
+.ebz-gpay-circle {
+    width: 76px;
+    height: 76px;
+    border-radius: 50%;
+    background: #10b981;
+    color: #ffffff;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 36px;
+    margin-bottom: 12px;
+    box-shadow: 0 0 0 10px #ecfdf5;
+    animation: gpayPulse 1.2s infinite;
+}
+@keyframes ebzZoom { from { opacity: 0; transform: scale(0.96); } to { opacity: 1; transform: scale(1); } }
+@keyframes gpayPulse {
+    0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4); }
+    70% { transform: scale(1); box-shadow: 0 0 0 14px rgba(16, 185, 129, 0); }
+    100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+}

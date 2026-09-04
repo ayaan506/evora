@@ -1,0 +1,747 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Dashboard & Invoices — Evora</title>
+    
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='images/E for evora.png') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='concerts.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='easebuzz_bridge.css') }}">
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script src="{{ url_for('static', filename='easebuzz_bridge.js') }}"></script>
+
+    <style>
+        .dash-container {
+            max-width: 1200px;
+            margin: 90px auto 60px auto;
+            padding: 0 24px;
+        }
+        .dash-layout {
+            display: grid;
+            grid-template-columns: 280px 1fr;
+            gap: 32px;
+            align-items: start;
+        }
+        .dash-sidebar {
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.02);
+        }
+        .user-profile-header {
+            text-align: center;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #f1f5f9;
+            margin-bottom: 20px;
+        }
+        .avatar-circle {
+            width: 72px;
+            height: 72px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #7c3aed, #db2777);
+            color: #ffffff;
+            font-size: 26px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 12px auto;
+        }
+        .dash-menu-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 16px;
+            border-radius: 10px;
+            color: #475569;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-bottom: 6px;
+            transition: all 0.2s ease;
+        }
+        .dash-menu-item:hover {
+            background: #f8fafc;
+            color: #0f172a;
+        }
+        .dash-menu-item.active {
+            background: #ede9fe;
+            color: #7c3aed;
+        }
+        .booking-record-card {
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 14px;
+            padding: 18px 20px;
+            margin-bottom: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
+            transition: transform 0.2s ease;
+        }
+        .booking-record-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.05);
+        }
+        .booking-record-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .booking-main-info {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+        .booking-type-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: 10px;
+            background: #f1f5f9;
+            color: #7c3aed;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            flex-shrink: 0;
+        }
+        .booking-details h4 {
+            font-size: 15px;
+            font-weight: 700;
+            color: #0f172a;
+            margin: 0 0 4px 0;
+        }
+        .booking-details p {
+            font-size: 12px;
+            color: #64748b;
+            margin: 0;
+            line-height: 1.5;
+        }
+        .booking-status-badge {
+            font-size: 11px;
+            font-weight: 700;
+            padding: 4px 12px;
+            border-radius: 20px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            display: inline-block;
+        }
+        .status-confirmed {
+            background: #ecfdf5;
+            color: #059669;
+            border: 1px solid #a7f3d0;
+        }
+        .status-pending_approval {
+            background: #fffbeb;
+            color: #b45309;
+            border: 1px solid #fde68a;
+        }
+        .status-approved_awaiting_payment {
+            background: #eff6ff;
+            color: #1d4ed8;
+            border: 1px solid #bfdbfe;
+        }
+        .btn-view-ticket {
+            background: linear-gradient(135deg, #7c3aed, #db2777);
+            color: #ffffff;
+            border: none;
+            padding: 8px 14px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: opacity 0.2s;
+        }
+        .btn-view-invoice {
+            background: #0f172a;
+            color: #ffffff;
+            border: none;
+            padding: 8px 14px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: background 0.2s;
+        }
+        .btn-view-invoice:hover { background: #1e293b; }
+
+        .btn-pay-approved {
+            background: #059669;
+            color: #ffffff;
+            border: none;
+            padding: 9px 18px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            box-shadow: 0 4px 12px rgba(5, 150, 105, 0.25);
+            transition: background 0.15s;
+        }
+        .btn-pay-approved:hover {
+            background: #047857;
+        }
+
+        .empty-records-state {
+            background: #ffffff;
+            border: 1px dashed #cbd5e1;
+            border-radius: 14px;
+            padding: 48px 24px;
+            text-align: center;
+            color: #94a3b8;
+        }
+        .empty-records-state i {
+            font-size: 40px;
+            margin-bottom: 12px;
+            color: #cbd5e1;
+        }
+
+        /* DIGITAL TICKET MODAL */
+        .ticket-modal-card {
+            background: #ffffff;
+            border-radius: 18px;
+            border: 2px dashed #7c3aed;
+            padding: 24px;
+            text-align: center;
+        }
+        .ticket-qr-box {
+            background: #f8fafc;
+            border-radius: 12px;
+            padding: 16px;
+            display: inline-block;
+            margin: 16px 0;
+            border: 1px solid #e2e8f0;
+        }
+
+        /* INVOICE MODAL STYLING */
+        .invoice-card {
+            background: #ffffff;
+            border-radius: 16px;
+            padding: 28px;
+            border: 1px solid #e2e8f0;
+            font-size: 13px;
+        }
+        .invoice-header-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            border-bottom: 2px solid #f1f5f9;
+            padding-bottom: 16px;
+            margin-bottom: 20px;
+        }
+        .invoice-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 16px 0;
+        }
+        .invoice-table th {
+            background: #f8fafc;
+            padding: 10px 12px;
+            font-size: 11px;
+            text-transform: uppercase;
+            color: #64748b;
+            border-bottom: 1px solid #e2e8f0;
+            text-align: left;
+        }
+        .invoice-table td {
+            padding: 12px;
+            border-bottom: 1px solid #f1f5f9;
+        }
+        .milestone-split-box {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
+            background: #f8fafc;
+            border-radius: 12px;
+            padding: 16px;
+            margin: 16px 0;
+            border: 1px solid #e2e8f0;
+        }
+        .milestone-item {
+            padding: 10px;
+            border-radius: 8px;
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+        }
+
+        @media (max-width: 860px) {
+            .dash-layout { grid-template-columns: 1fr; }
+            .booking-record-top { flex-direction: column; align-items: flex-start; gap: 14px; }
+            .milestone-split-box { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body class="light-theme">
+
+    <!-- NAVIGATION BAR -->
+    <nav class="light-nav">
+        <a href="/" class="nav-logo-group" style="display: flex; align-items: center; gap: 10px; text-decoration: none;">
+            <div class="nav-logo-spacer" style="width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; overflow: visible;">
+                <img src="{{ url_for('static', filename='images/E for evora.png') }}" alt="Evora" class="nav-branded-logo-img" style="width: 100%; height: 100%; object-fit: contain; transform: scale(1.10);" onerror="this.style.display='none'">
+            </div>  
+            <span class="nav-logo-text" style="font-size: 24px; font-weight: 700;">evora</span>
+        </a>
+      
+        <div class="light-nav-links">
+            <a href="/events">Events</a>
+            <a href="/venues">Venues</a>
+            <a href="/manpower">Hire Staff</a>
+            <a href="/planner">Plan My Event</a>
+            <a href="/contact">Contact</a>
+        </div>
+        <div class="light-nav-actions">
+            <button onclick="logout()" class="btn-light-signup" style="background: #ef4444; border:none; cursor:pointer;">
+                <i class="fa-solid fa-right-from-bracket"></i> Logout
+            </button>
+        </div>
+    </nav>
+
+    <main class="dash-container">
+        <div class="dash-layout">
+            
+            <!-- LEFT SIDEBAR -->
+            <aside class="dash-sidebar">
+                <div class="user-profile-header">
+                    <div class="avatar-circle" id="profile-avatar">U</div>
+                    <h3 id="profile-name" style="margin: 0 0 4px 0; font-size: 16px; font-weight: 700; color: #0f172a;">Customer</h3>
+                    <p id="profile-email" style="margin: 0; font-size: 12px; color: #64748b;">user@example.com</p>
+                </div>
+
+                <div class="dash-menu-item active" onclick="switchTab('passes', this)">
+                    <span><i class="fa-solid fa-ticket" style="margin-right: 8px;"></i> Concert Passes</span>
+                    <span class="blueprint-count-badge" id="badge-passes" style="background:#7c3aed; font-size:10px; padding:2px 8px;">0</span>
+                </div>
+
+                <div class="dash-menu-item" onclick="switchTab('manpower', this)">
+                    <span><i class="fa-solid fa-user-tie" style="margin-right: 8px;"></i> Hired Staff & Invoices</span>
+                    <span class="blueprint-count-badge" id="badge-manpower" style="background:#64748b; font-size:10px; padding:2px 8px;">0</span>
+                </div>
+
+                <div class="dash-menu-item" onclick="switchTab('venues', this)">
+                    <span><i class="fa-solid fa-building" style="margin-right: 8px;"></i> Venue Reservations</span>
+                    <span class="blueprint-count-badge" id="badge-venues" style="background:#64748b; font-size:10px; padding:2px 8px;">0</span>
+                </div>
+            </aside>
+
+            <!-- MAIN CONTENT AREA -->
+            <section>
+                
+                <!-- TAB 1: PASSES -->
+                <div id="tab-passes">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                        <h2 style="font-size: 20px; font-weight: 700; margin: 0; color: #0f172a;">My Event Passes</h2>
+                        <a href="/events" class="btn-view-ticket" style="text-decoration:none;"><i class="fa-solid fa-plus"></i> Book More Passes</a>
+                    </div>
+                    <div id="passes-container"></div>
+                </div>
+
+                <!-- TAB 2: MANPOWER & EVENT INVOICES -->
+                <div id="tab-manpower" style="display: none;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                        <h2 style="font-size: 20px; font-weight: 700; margin: 0; color: #0f172a;">Manpower & Event Invoices</h2>
+                        <a href="/planner" class="btn-view-ticket" style="text-decoration:none;"><i class="fa-solid fa-calculator"></i> Plan Another Event</a>
+                    </div>
+                    <div id="manpower-container"></div>
+                </div>
+
+                <!-- TAB 3: VENUES -->
+                <div id="tab-venues" style="display: none;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                        <h2 style="font-size: 20px; font-weight: 700; margin: 0; color: #0f172a;">Reserved Venues</h2>
+                        <a href="/venues" class="btn-view-ticket" style="text-decoration:none;"><i class="fa-solid fa-plus"></i> Explore Venues</a>
+                    </div>
+                    <div id="venues-container"></div>
+                </div>
+
+            </section>
+
+        </div>
+    </main>
+
+    <!-- DIGITAL TICKET MODAL -->
+    <div class="modal-overlay" id="ticket-modal">
+        <div class="modal-container" style="max-width: 440px;">
+            <div class="modal-header">
+                <h3>Evora Verified Digital Pass</h3>
+                <button class="btn-close-modal" onclick="closeTicketModal()"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+
+            <div class="ticket-modal-card">
+                <div style="font-size: 11px; font-weight: 700; color: #7c3aed; text-transform: uppercase; letter-spacing: 1px;">Official Entry E-Ticket</div>
+                <h3 id="t-event-name" style="margin: 6px 0 2px 0; color: #0f172a; font-size: 18px;">Event Title</h3>
+                <p id="t-venue-date" style="font-size: 12px; color: #64748b; margin: 0 0 10px 0;">Venue & Date</p>
+
+                <div class="ticket-qr-box">
+                    <img id="t-qr-code" src="" alt="Pass QR Code" style="width: 140px; height: 140px; display: block;">
+                </div>
+
+                <div style="display: flex; justify-content: space-between; font-size: 12px; border-top: 1px dashed #e2e8f0; padding-top: 12px;">
+                    <span>Pass Type: <strong id="t-tier" style="color:#0f172a;">General Pass</strong></span>
+                    <span>Ref: <strong id="t-booking-id" style="color:#7c3aed;">EVR-000000</strong></span>
+                </div>
+            </div>
+
+            <button class="btn-pay-submit" style="margin-top: 16px;" onclick="window.print()"><i class="fa-solid fa-print"></i> Print / Save Ticket</button>
+        </div>
+    </div>
+
+    <!-- 50-50 MILESTONE INVOICE MODAL -->
+    <div class="modal-overlay" id="invoice-modal">
+        <div class="modal-container" style="max-width: 600px;">
+            <div class="modal-header">
+                <h3>Tax Invoice & Milestone Settlement</h3>
+                <button class="btn-close-modal" onclick="closeInvoiceModal()"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+
+            <div class="invoice-card" id="printable-invoice">
+                <!-- INVOICE TOP -->
+                <div class="invoice-header-row">
+                    <div>
+                        <h2 style="margin: 0; color: #7c3aed; font-size: 22px; font-weight: 800;">evora</h2>
+                        <p style="margin: 2px 0 0 0; font-size: 11px; color: #64748b;">Evora Live Event Operations Pvt. Ltd.<br>GSTIN: 27AABCE1234F1Z5 • Pune, India</p>
+                    </div>
+                    <div style="text-align: right;">
+                        <span style="background:#ecfdf5; color:#059669; font-size:10px; font-weight:700; padding:3px 8px; border-radius:4px; text-transform:uppercase;">Advance Paid</span>
+                        <div style="font-size: 12px; font-weight: 700; color: #0f172a; margin-top: 4px;" id="inv-ref">REF-000000</div>
+                        <div style="font-size: 11px; color: #64748b;" id="inv-date">Date</div>
+                    </div>
+                </div>
+
+                <!-- BILLED TO -->
+                <div style="margin-bottom: 14px;">
+                    <div style="font-size: 11px; text-transform: uppercase; color: #94a3b8; font-weight: 700;">Billed To</div>
+                    <div style="font-size: 14px; font-weight: 700; color: #0f172a;" id="inv-client-name">Customer Name</div>
+                    <div style="font-size: 12px; color: #64748b;" id="inv-client-email">email@example.com</div>
+                </div>
+
+                <!-- ITEM DESCRIPTION -->
+                <table class="invoice-table">
+                    <thead>
+                        <tr>
+                            <th>Description / Role</th>
+                            <th>Requirements & Shift</th>
+                            <th style="text-align: right;">Contract Value</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong id="inv-item-title">Custom Blueprint</strong></td>
+                            <td id="inv-item-details" style="font-size: 11px; color: #475569; max-width: 260px;">20 Staff Crew</td>
+                            <td style="text-align: right; font-weight: 700;" id="inv-total-budget">₹ 0</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <!-- 50-50 MILESTONE BREAKDOWN BOX -->
+                <div class="milestone-split-box">
+                    <div class="milestone-item" style="border-left: 4px solid #059669;">
+                        <div style="font-size: 11px; font-weight: 700; color: #059669; text-transform: uppercase;">1. Advance Milestone (50%)</div>
+                        <div style="font-size: 18px; font-weight: 800; color: #0f172a; margin: 4px 0;" id="inv-paid-amount">₹ 0</div>
+                        <div style="font-size: 11px; color: #059669; font-weight: 600;"><i class="fa-solid fa-circle-check"></i> Paid & Verified</div>
+                    </div>
+
+                    <div class="milestone-item" style="border-left: 4px solid #f59e0b;">
+                        <div style="font-size: 11px; font-weight: 700; color: #d97706; text-transform: uppercase;">2. Remaining Balance (50%)</div>
+                        <div style="font-size: 18px; font-weight: 800; color: #0f172a; margin: 4px 0;" id="inv-due-amount">₹ 0</div>
+                        <div style="font-size: 11px; color: #d97706; font-weight: 600;"><i class="fa-solid fa-clock"></i> Due at Event Settlement</div>
+                    </div>
+                </div>
+
+                <div style="font-size: 11px; color: #94a3b8; text-align: center; border-top: 1px dashed #e2e8f0; padding-top: 12px;">
+                    Payment Milestone Policy: 50% advance token paid online. Remaining 50% balance settled upon shift dispatch & event execution.
+                </div>
+            </div>
+
+            <button class="btn-pay-submit" style="margin-top: 16px;" onclick="window.print()"><i class="fa-solid fa-print"></i> Print / Download Tax Invoice</button>
+        </div>
+    </div>
+
+    <script>
+        function switchTab(tabKey, element) {
+            document.querySelectorAll('.dash-menu-item').forEach(item => {
+                item.classList.remove('active');
+                const badge = item.querySelector('.blueprint-count-badge');
+                if (badge) badge.style.background = '#64748b';
+            });
+            
+            element.classList.add('active');
+            const activeBadge = element.querySelector('.blueprint-count-badge');
+            if (activeBadge) activeBadge.style.background = '#7c3aed';
+
+            document.getElementById('tab-passes').style.display = 'none';
+            document.getElementById('tab-manpower').style.display = 'none';
+            document.getElementById('tab-venues').style.display = 'none';
+
+            document.getElementById(`tab-${tabKey}`).style.display = 'block';
+        }
+
+async function loadUserBookings() {
+    try {
+        const response = await fetch(`/api/user-bookings`, { credentials: 'include' });
+        const data = await response.json();
+
+        if (data.status === 'auth_required' || response.status === 401) {
+            window.location.href = '/login';
+            return;
+        }
+
+        // Sync and display the true logged-in user's details
+        if (data.user_email && data.fullname) {
+            const userEmail = data.user_email;
+            const userName = data.fullname;
+
+            // Sync localStorage so other components stay updated
+            localStorage.setItem('userEmail', userEmail);
+            localStorage.setItem('userName', userName);
+            localStorage.setItem('isLoggedIn', 'true');
+
+            document.getElementById('profile-email').innerText = userEmail;
+            document.getElementById('profile-name').innerText = userName;
+            document.getElementById('profile-avatar').innerText = userName.charAt(0).toUpperCase();
+        }
+
+        const passesWrap = document.getElementById('passes-container');
+        const manpowerWrap = document.getElementById('manpower-container');
+        const venuesWrap = document.getElementById('venues-container');
+
+        passesWrap.innerHTML = '';
+        manpowerWrap.innerHTML = '';
+        venuesWrap.innerHTML = '';
+
+        let passCount = 0;
+        let manpowerCount = 0;
+        let venueCount = 0;
+
+        if (data.status === 'success' && data.bookings.length > 0) {
+            data.bookings.forEach(b => {
+                const statusLower = (b.status || '').toLowerCase();
+                let statusClass = 'status-confirmed';
+                if (statusLower === 'pending_approval') statusClass = 'status-pending_approval';
+                else if (statusLower === 'approved_awaiting_payment') statusClass = 'status-approved_awaiting_payment';
+
+                if (b.type === 'passes') {
+                    passCount++;
+                    passesWrap.innerHTML += `
+                        <div class="booking-record-card">
+                            <div class="booking-record-top">
+                                <div class="booking-main-info">
+                                    <div class="booking-type-icon"><i class="fa-solid fa-ticket"></i></div>
+                                    <div class="booking-details">
+                                        <h4>${b.title}</h4>
+                                        <p><i class="fa-solid fa-location-dot"></i> ${b.details}</p>
+                                        <p style="margin-top: 4px; color: #7c3aed; font-weight: 700;">₹ ${b.price.toLocaleString('en-IN')} • Ref: ${b.ref}</p>
+                                    </div>
+                                </div>
+                                <div style="display: flex; align-items: center; gap: 8px;">
+                                    <span class="booking-status-badge ${statusClass}">${b.status.replace(/_/g, ' ')}</span>
+                                    <button class="btn-view-ticket" onclick="showDigitalTicket('${b.title}', '${b.date}', '${b.details}', '${b.ref}')">
+                                        <i class="fa-solid fa-qrcode"></i> View Pass
+                                    </button>
+                                    <a href="/api/download-ticket-pdf/${b.id}" class="btn-view-ticket" style="background: #0f172a; text-decoration: none;" title="Download Official PDF Ticket">
+                                        <i class="fa-solid fa-file-arrow-down"></i> PDF
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                } else if (b.type === 'manpower') {
+                    manpowerCount++;
+
+                    let paidAdvance = b.price;
+                    let totalBudget = paidAdvance * 2;
+                    let balanceDue = paidAdvance;
+
+                    manpowerWrap.innerHTML += `
+                        <div class="booking-record-card">
+                            <div class="booking-record-top">
+                                <div class="booking-main-info">
+                                    <div class="booking-type-icon"><i class="fa-solid fa-user-tie"></i></div>
+                                    <div class="booking-details">
+                                        <h4>${b.title}</h4>
+                                        <p><i class="fa-solid fa-clipboard-list"></i> ${b.details}</p>
+                                        <p style="margin-top: 4px; color: #7c3aed; font-weight: 700;">
+                                            Paid Advance (50%): ₹ ${paidAdvance.toLocaleString('en-IN')} • Ref: ${b.ref}
+                                        </p>
+                                    </div>
+                                </div>
+                                <div style="display: flex; align-items: center; gap: 8px;">
+                                    <span class="booking-status-badge ${statusClass}">${b.status.replace(/_/g, ' ')}</span>
+                                    <button class="btn-view-invoice" onclick="openInvoiceModal('${b.title}', '${escape(b.details)}', ${paidAdvance}, ${totalBudget}, ${balanceDue}, '${b.ref}', '${b.date}')">
+                                        <i class="fa-solid fa-file-invoice-dollar"></i> View Invoice
+                                    </button>
+                                    <a href="/api/download-ticket-pdf/${b.id}" class="btn-view-invoice" style="text-decoration: none;" title="Download PDF Tax Invoice">
+                                        <i class="fa-solid fa-file-arrow-down"></i> PDF
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                } else if (b.type === 'venues') {
+                    venueCount++;
+                    let venueActionHTML = '';
+
+                    if (b.status === 'APPROVED_AWAITING_PAYMENT') {
+                        venueActionHTML = `
+                            <div style="background:#eff6ff; border:1px solid #bfdbfe; border-radius:10px; padding:12px 16px; display:flex; justify-content:space-between; align-items:center;">
+                                <div>
+                                    <strong style="color:#1d4ed8; font-size:13px;"><i class="fa-solid fa-circle-check"></i> Venue Approved & Allocated!</strong>
+                                    <p style="margin:2px 0 0 0; font-size:12px; color:#1e40af;">Your allocation is locked. Complete payment to finalize reservation.</p>
+                                </div>
+                                <button class="btn-pay-approved" onclick="payForApprovedVenue(${b.id}, '${b.title.replace(/'/g, "\\'")}', ${b.price}, '${b.date}')">
+                                    Pay ₹${b.price.toLocaleString('en-IN')} →
+                                </button>
+                            </div>
+                        `;
+                    } else if (b.status === 'PENDING_APPROVAL') {
+                        venueActionHTML = `
+                            <div style="background:#fffbeb; border:1px solid #fde68a; border-radius:10px; padding:10px 14px; font-size:12px; color:#92400e; display:flex; align-items:center; gap:8px;">
+                                <i class="fa-solid fa-hourglass-half fa-spin"></i> Operations desk is reviewing this request. You will receive an email once approved to complete payment.
+                            </div>
+                        `;
+                    } else {
+                        venueActionHTML = `
+                            <div style="display: flex; justify-content: flex-end; gap: 8px;">
+                                <button class="btn-view-invoice" onclick="openInvoiceModal('${b.title}', '${escape(b.details)}', ${b.price}, ${b.price}, 0, '${b.ref}', '${b.date}')">
+                                    <i class="fa-solid fa-file-invoice-dollar"></i> View Invoice
+                                </button>
+                                <a href="/api/download-ticket-pdf/${b.id}" class="btn-view-invoice" style="text-decoration: none;" title="Download PDF Tax Invoice">
+                                    <i class="fa-solid fa-file-arrow-down"></i> PDF
+                                </a>
+                            </div>
+                        `;
+                    }
+
+                    venuesWrap.innerHTML += `
+                        <div class="booking-record-card">
+                            <div class="booking-record-top">
+                                <div class="booking-main-info">
+                                    <div class="booking-type-icon"><i class="fa-solid fa-building"></i></div>
+                                    <div class="booking-details">
+                                        <h4>${b.title}</h4>
+                                        <p><i class="fa-solid fa-calendar-days"></i> ${b.date} • ${b.details}</p>
+                                        <p style="margin-top: 4px; color: #7c3aed; font-weight: 700;">Rate: ₹ ${b.price.toLocaleString('en-IN')} • Ref: ${b.ref}</p>
+                                    </div>
+                                </div>
+                                <span class="booking-status-badge ${statusClass}">${b.status.replace(/_/g, ' ')}</span>
+                            </div>
+                            ${venueActionHTML}
+                        </div>
+                    `;
+                }
+            });
+        }
+
+        if (passCount === 0) passesWrap.innerHTML = `<div class="empty-records-state"><i class="fa-solid fa-ticket"></i><p>No active event passes found.</p></div>`;
+        if (manpowerCount === 0) manpowerWrap.innerHTML = `<div class="empty-records-state"><i class="fa-solid fa-user-tie"></i><p>No manpower or custom event plans booked yet.</p></div>`;
+        if (venueCount === 0) venuesWrap.innerHTML = `<div class="empty-records-state"><i class="fa-solid fa-building"></i><p>No venue reservations found.</p></div>`;
+
+        document.getElementById('badge-passes').innerText = passCount;
+        document.getElementById('badge-manpower').innerText = manpowerCount;
+        document.getElementById('badge-venues').innerText = venueCount;
+
+    } catch (err) {
+        console.error("Dashboard fetch error:", err);
+    }
+}
+
+        function payForApprovedVenue(bookingId, venueName, price, eventDate) {
+            const payload = {
+                booking_type: 'venues',
+                title: venueName,
+                details: `Venue Allocated & Confirmed • Date: ${eventDate}`,
+                booking_date: eventDate,
+                total_price: price,
+                existing_booking_id: bookingId
+            };
+            triggerEasebuzzGateway(payload);
+        }
+
+        function showDigitalTicket(title, dateText, details, refId) {
+            document.getElementById('t-event-name').innerText = title;
+            document.getElementById('t-venue-date').innerText = `${details}`;
+            document.getElementById('t-tier').innerText = 'Verified Entry Pass';
+            document.getElementById('t-booking-id').innerText = refId;
+
+            const qrPayload = encodeURIComponent(`EVORA|${refId}|${title}`);
+            document.getElementById('t-qr-code').src = `https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=${qrPayload}`;
+
+            document.getElementById('ticket-modal').classList.add('active');
+        }
+
+        function closeTicketModal() {
+            document.getElementById('ticket-modal').classList.remove('active');
+        }
+
+        function openInvoiceModal(title, unescapedDetails, paidAmt, totalBudget, dueAmt, refId, dateStr) {
+            const details = unescape(unescapedDetails);
+            const userEmail = localStorage.getItem('userEmail') || 'customer@evora.com';
+            const userName = localStorage.getItem('userName') || 'Evora Client';
+
+            document.getElementById('inv-ref').innerText = refId;
+            document.getElementById('inv-date').innerText = `Date: ${dateStr || new Date().toISOString().split('T')[0]}`;
+            document.getElementById('inv-client-name').innerText = userName;
+            document.getElementById('inv-client-email').innerText = userEmail;
+
+            document.getElementById('inv-item-title').innerText = title;
+            document.getElementById('inv-item-details').innerText = details;
+            document.getElementById('inv-total-budget').innerText = `₹ ${totalBudget.toLocaleString('en-IN')}`;
+
+            document.getElementById('inv-paid-amount').innerText = `₹ ${paidAmt.toLocaleString('en-IN')}`;
+            document.getElementById('inv-due-amount').innerText = `₹ ${dueAmt.toLocaleString('en-IN')}`;
+
+            document.getElementById('invoice-modal').classList.add('active');
+        }
+
+        function closeInvoiceModal() {
+            document.getElementById('invoice-modal').classList.remove('active');
+        }
+
+        function logout() {
+            localStorage.clear();
+            sessionStorage.clear();
+            window.location.href = "/logout";
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            loadUserBookings();
+            
+            // If logged in user is admin, show a quick shortcut button to open Admin panel
+            const isAdmin = localStorage.getItem('isAdmin') === 'true' || localStorage.getItem('userEmail') === 'admin@evora.com';
+            if (isAdmin) {
+                const aside = document.querySelector('.dash-sidebar');
+                if (aside) {
+                    const adminLink = document.createElement('a');
+                    adminLink.href = '/admin';
+                    adminLink.className = 'btn-auth-submit';
+                    adminLink.style.display = 'block';
+                    adminLink.style.textAlign = 'center';
+                    adminLink.style.textDecoration = 'none';
+                    adminLink.style.marginTop = '16px';
+                    adminLink.style.fontSize = '12px';
+                    adminLink.style.padding = '10px';
+                    adminLink.innerHTML = '<i class="fa-solid fa-shield-halved"></i> Open Admin Command Center';
+                    aside.appendChild(adminLink);
+                }
+            }
+        });
+    </script>
+</body>
+</html>

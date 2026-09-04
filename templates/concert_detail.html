@@ -1,0 +1,1209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Event Details — Evora</title>
+    
+    <!-- FLASK STATIC CSS & FAVICON -->
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='images/E for evora.png') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='concerts.css') }}">
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        /* EASEBUZZ OVERLAY & WRAPPER */
+        .ebz-overlay {
+            position: fixed;
+            inset: 0;
+            background: linear-gradient(135deg, rgba(15, 23, 42, 0.85), rgba(30, 27, 75, 0.85));
+            z-index: 99999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(8px);
+            padding: 20px;
+        }
+        .ebz-wrapper {
+            width: 100%;
+            max-width: 820px;
+            animation: ebzZoom 0.25s ease-out;
+        }
+        .ebz-top-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: #ffffff;
+            margin-bottom: 12px;
+            font-size: 13px;
+        }
+        .ebz-btn-cancel {
+            background: transparent;
+            border: none;
+            color: #ffffff;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .ebz-lang-select {
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        /* CARD STRUCTURE */
+        .ebz-card {
+            background: #ffffff;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.35);
+        }
+        .ebz-purple-banner {
+            background: #3b49df;
+            padding: 18px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: #ffffff;
+        }
+        .ebz-merchant-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .ebz-merchant-logo {
+            width: 44px;
+            height: 44px;
+            background: #ffffff;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 4px;
+        }
+        .ebz-merchant-logo img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+        .ebz-merchant-url {
+            font-size: 15px;
+            font-weight: 600;
+            letter-spacing: -0.2px;
+        }
+        .ebz-tr-id {
+            font-size: 12px;
+            opacity: 0.85;
+        }
+        .ebz-timer-badge {
+            background: rgba(15, 23, 42, 0.35);
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .ebz-timer-badge strong {
+            font-size: 14px;
+            color: #ffffff;
+        }
+
+        /* TWO-COLUMN LAYOUT */
+        .ebz-body {
+            display: flex;
+            min-height: 380px;
+        }
+        .ebz-sidebar {
+            width: 42%;
+            border-right: 1px solid #e2e8f0;
+            padding: 20px 16px;
+            background: #ffffff;
+        }
+        .ebz-sidebar-title {
+            font-size: 13px;
+            font-weight: 600;
+            color: #64748b;
+            margin-bottom: 12px;
+            padding-left: 8px;
+        }
+        .ebz-method-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 12px;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: background 0.15s;
+            margin-bottom: 4px;
+        }
+        .ebz-method-item:hover {
+            background: #f8fafc;
+        }
+        .ebz-method-item.active {
+            background: #eff6ff;
+            border: 1px solid #bfdbfe;
+        }
+        .ebz-method-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            background: #f1f5f9;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #334155;
+            font-size: 14px;
+        }
+        .ebz-method-item.active .ebz-method-icon {
+            background: #3b49df;
+            color: #ffffff;
+        }
+        .ebz-method-content {
+            flex: 1;
+        }
+        .ebz-method-name {
+            font-size: 13px;
+            font-weight: 600;
+            color: #0f172a;
+        }
+        .ebz-offer-badge {
+            font-size: 11px;
+            color: #059669;
+            font-weight: 600;
+        }
+        .ebz-partner-logos {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 14px;
+            color: #64748b;
+        }
+
+        /* RIGHT CONTENT PANEL */
+        .ebz-content-panel {
+            width: 58%;
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            background: #ffffff;
+        }
+        .ebz-offer-strip {
+            background: #fffbeb;
+            border: 1px solid #fde68a;
+            border-radius: 10px;
+            padding: 10px 14px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+            font-size: 12px;
+            color: #92400e;
+        }
+        .ebz-badge-h {
+            background: #f59e0b;
+            color: #ffffff;
+            font-weight: 700;
+            font-size: 10px;
+            padding: 2px 6px;
+            border-radius: 4px;
+            margin-right: 6px;
+        }
+        .ebz-btn-apply {
+            background: transparent;
+            border: none;
+            color: #3b49df;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        /* QR CODE FRAME */
+        .ebz-qr-frame {
+            padding: 12px;
+            background: #ffffff;
+            border: 2px solid #e2e8f0;
+            border-radius: 14px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+            display: inline-block;
+        }
+
+        /* FORMS & INPUTS */
+        .ebz-form-group {
+            display: flex;
+            gap: 10px;
+        }
+        .ebz-input {
+            width: 100%;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            padding: 10px 12px;
+            font-size: 13px;
+            outline: none;
+        }
+        .ebz-input-card-box {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            padding: 0 12px;
+            width: 100%;
+        }
+        .ebz-input-card-box input {
+            border: none;
+            padding: 10px 0;
+            outline: none;
+            width: 100%;
+            font-size: 13px;
+        }
+        .ebz-bank-pill {
+            border: 1px solid #e2e8f0;
+            background: #f8fafc;
+            padding: 8px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 600;
+            color: #334155;
+            cursor: pointer;
+        }
+        .ebz-bank-pill.active {
+            border-color: #3b49df;
+            background: #eff6ff;
+            color: #3b49df;
+        }
+
+        /* FOOTER BUTTON */
+        .ebz-footer-action {
+            margin-top: auto;
+            padding-top: 16px;
+        }
+        .ebz-pay-btn {
+            width: 100%;
+            background: #e2e8f0;
+            color: #475569;
+            border: none;
+            padding: 14px;
+            border-radius: 10px;
+            font-size: 15px;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: background 0.2s;
+        }
+        .ebz-pay-btn.ready {
+            background: #059669;
+            color: #ffffff;
+            box-shadow: 0 4px 14px rgba(5, 150, 105, 0.3);
+        }
+        .ebz-charges-note {
+            text-align: center;
+            font-size: 11px;
+            color: #94a3b8;
+            margin-top: 8px;
+        }
+
+        /* MODAL BOTTOM BAR */
+        .ebz-modal-footer {
+            background: #f8fafc;
+            border-top: 1px solid #e2e8f0;
+            padding: 12px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 12px;
+            color: #64748b;
+        }
+        .ebz-footer-badges {
+            display: flex;
+            gap: 14px;
+        }
+
+        /* GPAY PULSING CIRCLE */
+        .ebz-gpay-success {
+            text-align: center;
+            padding: 24px 0;
+        }
+        .ebz-gpay-circle {
+            width: 76px;
+            height: 76px;
+            border-radius: 50%;
+            background: #10b981;
+            color: #ffffff;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 36px;
+            margin-bottom: 12px;
+            box-shadow: 0 0 0 10px #ecfdf5;
+            animation: gpayPulse 1.2s infinite;
+        }
+
+        @keyframes ebzZoom {
+            from { opacity: 0; transform: scale(0.96); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        @keyframes gpayPulse {
+            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4); }
+            70% { transform: scale(1); box-shadow: 0 0 0 14px rgba(16, 185, 129, 0); }
+            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+        }
+    </style>
+</head>
+<body class="light-theme">
+
+    <!-- NAVIGATION BAR -->
+    <nav class="light-nav">
+        <a href="/" class="nav-logo-group" style="display: flex; align-items: center; gap: 10px; text-decoration: none;">
+            <div class="nav-logo-spacer" style="width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; overflow: visible;">
+                <img src="{{ url_for('static', filename='images/E for evora.png') }}" alt="Evora" class="nav-branded-logo-img" style="width: 100%; height: 100%; object-fit: contain; transform: scale(1.15);" onerror="this.style.display='none'">
+            </div>  
+            <span class="nav-logo-text" style="font-size: 24px; font-weight: 700;">evora</span>
+        </a>
+        <div class="light-nav-links">
+            <a href="/events">Events</a>
+            <a href="/venues">Venues</a>
+            <a href="/manpower">Hire Staff</a>
+            <a href="/planner">Plan My Event</a>
+            <a href="/contact">Contact</a>
+        </div>
+        <div class="light-nav-actions" id="nav-actions-logged-out">
+            <a href="/login" class="btn-light-login">Login</a>
+            <a href="/signup" class="btn-light-signup">Sign Up</a>
+        </div>
+        <div class="light-nav-actions" id="nav-actions-logged-in" style="display: none;">
+            <a href="/dashboard" class="btn-light-signup">
+                <i class="fa-solid fa-user"></i> My Dashboard
+            </a>
+        </div>
+    </nav>
+
+    <!-- TOP CATEGORY SCROLLER -->
+    <div style="max-width: 1200px; margin: 90px auto 0 auto; padding: 0 24px;">
+        <div class="top-scroller">
+            <a href="/events?category=all" class="top-scroller-chip">All Events</a>
+            <a href="/events?category=music" class="top-scroller-chip">Music Shows</a>
+            <a href="/events?category=comedy" class="top-scroller-chip">Comedy Shows</a>
+            <a href="/events?category=theatre" class="top-scroller-chip">Theatre</a>
+            <a href="/events?category=workshops" class="top-scroller-chip">Workshops</a>
+            <a href="/events?category=interactive" class="top-scroller-chip">Interactive Games</a>
+            <a href="/events?category=adventure" class="top-scroller-chip">Adventure</a>
+            <a href="/events?category=amusement" class="top-scroller-chip">Amusement Parks</a>
+            <a href="/events?category=art" class="top-scroller-chip">Art & Crafts</a>
+        </div>
+    </div>
+
+    <!-- MASTER DETAIL CONTAINER -->
+    <main class="bms-detail-container" style="margin-top: 10px;">
+        
+        <!-- HEADER TITLE & SHARE -->
+        <header class="bms-event-header">
+            <h1 class="bms-event-title" id="event-title">Loading Event...</h1>
+            <button class="btn-share" onclick="shareEvent()" title="Share Event"><i class="fa-solid fa-share-nodes"></i></button>
+        </header>
+
+        <!-- DUAL COLUMN GRID -->
+        <div class="bms-detail-grid">
+            
+            <!-- LEFT COLUMN: MEDIA & EVENT INFO -->
+            <section class="bms-main-content">
+                <img id="event-banner-img" src="" alt="Event Poster" class="bms-media-poster">
+
+                <!-- TAGS & INTERESTED ROW -->
+                <div class="bms-tag-bar">
+                    <div class="bms-tag-group">
+                        <span class="bms-pill-tag" id="tag-category">Live Show</span>
+                        <span class="bms-pill-tag" id="tag-genre">Concert</span>
+                    </div>
+                    <div class="interest-counter">
+                        <span><i class="fa-solid fa-thumbs-up" style="color:#10b981;"></i> <strong id="interest-count">142</strong> are interested</span>
+                        <button class="btn-interested" id="btn-interest" onclick="toggleInterest()">I'm Interested</button>
+                    </div>
+                </div>
+
+                <!-- ABOUT THE EVENT -->
+                <div class="detail-section-block">
+                    <h3 class="detail-section-title">About The Event</h3>
+                    <p class="detail-section-body" id="event-about-text">
+                        Get ready for an unforgettable live experience! Join us for a high-energy performance featuring exceptional talent, mesmerizing audio-visual production, and an electric atmosphere designed for true fans.
+                    </p>
+                </div>
+
+                <!-- ARTIST / HOST INFORMATION -->
+                <div class="detail-section-block">
+                    <h3 class="detail-section-title">Artist Information</h3>
+                    <div class="artist-profile-card">
+                        <img id="artist-avatar" src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80" alt="Artist Avatar" class="artist-avatar">
+                        <div>
+                            <h4 class="artist-name" id="artist-name">Featured Performing Artist</h4>
+                            <p class="artist-role" id="artist-role">Lead Performer / Headliner</p>
+                            <p style="font-size:12px; color:#64748b; margin:0;" id="artist-bio">Renowned live performer known for captivating audiences with iconic stage presence and unforgettable sets across major venues.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TERMS & CONDITIONS -->
+                <div class="detail-section-block" style="border-bottom:none;">
+                    <h3 class="detail-section-title">Terms & Conditions</h3>
+                    <ul style="font-size:12px; color:#64748b; padding-left:18px; line-height:1.8; margin:0;">
+                        <li>Tickets once booked cannot be exchanged, refunded, or canceled.</li>
+                        <li>Please carry a valid photo ID proof along with your e-ticket at entry.</li>
+                        <li>Rights of admission reserved by the venue management.</li>
+                        <li>Strictly no dangerous items, outside food, or beverages allowed inside.</li>
+                    </ul>
+                </div>
+            </section>
+
+            <!-- RIGHT COLUMN: STICKY BOOKING SUMMARY CARD -->
+            <aside class="bms-sidebar-column">
+                <div class="bms-sticky-card">
+                    
+                    <div class="info-item-row">
+                        <i class="fa-regular fa-calendar-days"></i>
+                        <span id="info-date">Sat, 24 Oct 2026</span>
+                    </div>
+
+                    <div class="info-item-row">
+                        <i class="fa-regular fa-clock"></i>
+                        <span>8:00 PM onwards</span>
+                    </div>
+
+                    <div class="info-item-row">
+                        <i class="fa-solid fa-hourglass-half"></i>
+                        <span>2 Hours 30 Minutes</span>
+                    </div>
+
+                    <div class="info-item-row">
+                        <i class="fa-solid fa-user-group"></i>
+                        <span>Age Limit — 8yrs +</span>
+                    </div>
+
+                    <div class="info-item-row">
+                        <i class="fa-solid fa-language"></i>
+                        <span>Hindi / English</span>
+                    </div>
+
+                    <div class="info-item-row">
+                        <i class="fa-solid fa-masks-theater"></i>
+                        <span id="info-genre">Live Entertainment</span>
+                    </div>
+
+                    <div class="info-item-row">
+                        <i class="fa-solid fa-location-dot"></i>
+                        <div>
+                            <span id="info-venue" style="font-weight:600; color:#0f172a;">Dynamic Stadium: Pune</span>
+                        </div>
+                    </div>
+
+                    <!-- URGENCY ALERT STRIP -->
+                    <div class="bms-alert-strip">
+                        <i class="fa-solid fa-circle-info"></i>
+                        <span>Bookings are filling fast for this event</span>
+                    </div>
+
+                    <!-- PRICING & BOOK BUTTON -->
+                    <div class="card-footer-booking">
+                        <div>
+                            <p class="pricing-label" id="info-price">₹499 onwards</p>
+                            <span class="availability-status"><i class="fa-solid fa-circle" style="font-size:8px;"></i> Available</span>
+                        </div>
+                        <button class="btn-book-now-pink" onclick="openTicketModal()">Book Now</button>
+                    </div>
+
+                </div>
+            </aside>
+
+        </div>
+    </main>
+
+    <!-- MULTI-TIER TICKET SELECTOR MODAL -->
+    <div class="modal-overlay" id="ticket-modal">
+        <div class="modal-container">
+            <div class="modal-header">
+                <h3>Select Tickets & Passes</h3>
+                <button class="btn-close-modal" onclick="closeTicketModal()"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+
+            <!-- 6-TIER TICKET LIST -->
+            <div class="tickets-tier-list">
+                
+                <!-- 1. Regular -->
+                <div class="ticket-selector-box">
+                    <div class="ticket-info">
+                        <h4>Regular Pass</h4>
+                        <p id="price-regular">₹ 499 per pass</p>
+                    </div>
+                    <div class="qty-counter">
+                        <button class="btn-qty" onclick="changeTierQty('regular', -1)">-</button>
+                        <span class="qty-number" id="qty-regular">0</span>
+                        <button class="btn-qty" onclick="changeTierQty('regular', 1)">+</button>
+                    </div>
+                </div>
+
+                <!-- 2. Silver -->
+                <div class="ticket-selector-box">
+                    <div class="ticket-info">
+                        <h4>Silver Zone</h4>
+                        <p id="price-silver">₹ 799 per pass</p>
+                    </div>
+                    <div class="qty-counter">
+                        <button class="btn-qty" onclick="changeTierQty('silver', -1)">-</button>
+                        <span class="qty-number" id="qty-silver">0</span>
+                        <button class="btn-qty" onclick="changeTierQty('silver', 1)">+</button>
+                    </div>
+                </div>
+
+                <!-- 3. Gold -->
+                <div class="ticket-selector-box">
+                    <div class="ticket-info">
+                        <h4>Gold Deck</h4>
+                        <p id="price-gold">₹ 1,199 per pass</p>
+                    </div>
+                    <div class="qty-counter">
+                        <button class="btn-qty" onclick="changeTierQty('gold', -1)">-</button>
+                        <span class="qty-number" id="qty-gold">0</span>
+                        <button class="btn-qty" onclick="changeTierQty('gold', 1)">+</button>
+                    </div>
+                </div>
+
+                <!-- 4. Premium -->
+                <div class="ticket-selector-box">
+                    <div class="ticket-info">
+                        <h4>Premium Lounge</h4>
+                        <p id="price-premium">₹ 1,599 per pass</p>
+                    </div>
+                    <div class="qty-counter">
+                        <button class="btn-qty" onclick="changeTierQty('premium', -1)">-</button>
+                        <span class="qty-number" id="qty-premium">0</span>
+                        <button class="btn-qty" onclick="changeTierQty('premium', 1)">+</button>
+                    </div>
+                </div>
+
+                <!-- 5. Balcony -->
+                <div class="ticket-selector-box">
+                    <div class="ticket-info">
+                        <h4>Balcony View</h4>
+                        <p id="price-balcony">₹ 1,899 per pass</p>
+                    </div>
+                    <div class="qty-counter">
+                        <button class="btn-qty" onclick="changeTierQty('balcony', -1)">-</button>
+                        <span class="qty-number" id="qty-balcony">0</span>
+                        <button class="btn-qty" onclick="changeTierQty('balcony', 1)">+</button>
+                    </div>
+                </div>
+
+                <!-- 6. Front Row -->
+                <div class="ticket-selector-box">
+                    <div class="ticket-info">
+                        <h4>Front Row VIP</h4>
+                        <p id="price-frontrow">₹ 2,499 per pass</p>
+                    </div>
+                    <div class="qty-counter">
+                        <button class="btn-qty" onclick="changeTierQty('frontrow', -1)">-</button>
+                        <span class="qty-number" id="qty-frontrow">0</span>
+                        <button class="btn-qty" onclick="changeTierQty('frontrow', 1)">+</button>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- PAYMENT SUMMARY BOX -->
+            <div class="payment-box">
+                <div class="payment-summary">
+                    <span>Total Passes (<span id="summary-total-qty">0</span> selected)</span>
+                    <span id="summary-subtotal">₹ 0</span>
+                </div>
+                <div class="payment-summary" style="font-size:11px; color:#64748b;">
+                    <span>Convenience Fee & Taxes</span>
+                    <span id="summary-fee">₹ 0</span>
+                </div>
+                <hr style="border:none; border-top:1px solid #e2e8f0; margin:8px 0;">
+                <div class="payment-summary" style="font-size:15px; color:#7c3aed;">
+                    <span>Grand Total</span>
+                    <span id="summary-grandtotal">₹ 0</span>
+                </div>
+            </div>
+
+            <button class="btn-pay-submit" onclick="processBooking()">Proceed to Pay</button>
+        </div>
+    </div>
+
+    <!-- EASEBUZZ / BANKING GATEWAY MODAL -->
+    <div id="evora-gateway-modal" class="ebz-overlay" style="display: none;">
+        <div class="ebz-wrapper">
+            
+            <!-- TOP NAV BAR -->
+            <div class="ebz-top-header">
+                <button type="button" onclick="closeGatewayModal()" class="ebz-btn-cancel">
+                    <i class="fa-solid fa-xmark"></i> Cancel
+                </button>
+                <div class="ebz-lang-select">
+                    <i class="fa-solid fa-globe"></i> English <i class="fa-solid fa-chevron-down" style="font-size: 10px;"></i>
+                </div>
+            </div>
+
+            <!-- MAIN POPUP CARD -->
+            <div class="ebz-card">
+                
+                <!-- PURPLE BRAND HEADER -->
+                <div class="ebz-purple-banner">
+                    <div class="ebz-merchant-info">
+                        <div class="ebz-merchant-logo">
+                            <img src="{{ url_for('static', filename='images/E for evora.png') }}" onerror="this.src='https://via.placeholder.com/40'" alt="Evora">
+                        </div>
+                        <div class="ebz-merchant-text">
+                            <div class="ebz-merchant-url">https://evora.live/checkout/</div>
+                            <div class="ebz-tr-id">Tr ID <span id="ebz-display-trid">2300211808-P-3855016</span></div>
+                        </div>
+                    </div>
+
+                    <div class="ebz-timer-badge">
+                        <span>Payment Link valid For</span>
+                        <strong id="ebz-countdown-timer">14:59</strong>
+                    </div>
+                </div>
+
+                <!-- TWO COLUMN BODY -->
+                <div class="ebz-body">
+                    
+                    <!-- LEFT SIDEBAR: PAYMENT METHODS -->
+                    <div class="ebz-sidebar">
+                        <div class="ebz-sidebar-title">Select Payment Method</div>
+
+                        <!-- 1. UPI / QR SCANNER (Active / Primary) -->
+                        <div class="ebz-method-item active" onclick="switchGatewayTab('upi', this)">
+                            <div class="ebz-method-icon">
+                                <i class="fa-solid fa-qrcode"></i>
+                            </div>
+                            <div class="ebz-method-content">
+                                <div class="ebz-method-name">UPI / QR Code</div>
+                                <div class="ebz-offer-badge">Instant Verification</div>
+                            </div>
+                            <div class="ebz-partner-logos">
+                                <i class="fa-brands fa-google-pay"></i>
+                                <i class="fa-brands fa-amazon-pay"></i>
+                            </div>
+                        </div>
+
+                        <!-- 2. Credit Card -->
+                        <div class="ebz-method-item" onclick="switchGatewayTab('card', this)">
+                            <div class="ebz-method-icon">
+                                <i class="fa-regular fa-credit-card"></i>
+                            </div>
+                            <div class="ebz-method-content">
+                                <div class="ebz-method-name">Credit Card</div>
+                                <div class="ebz-offer-badge">1 Offer Available</div>
+                            </div>
+                            <div class="ebz-partner-logos">
+                                <i class="fa-brands fa-cc-visa"></i>
+                                <i class="fa-brands fa-cc-mastercard"></i>
+                            </div>
+                        </div>
+
+                        <!-- 3. Debit Card -->
+                        <div class="ebz-method-item" onclick="switchGatewayTab('debit', this)">
+                            <div class="ebz-method-icon">
+                                <i class="fa-solid fa-credit-card"></i>
+                            </div>
+                            <div class="ebz-method-content">
+                                <div class="ebz-method-name">Debit Card</div>
+                            </div>
+                            <div class="ebz-partner-logos">
+                                <i class="fa-brands fa-cc-visa"></i>
+                                <i class="fa-brands fa-cc-mastercard"></i>
+                            </div>
+                        </div>
+
+                        <!-- 4. NetBanking -->
+                        <div class="ebz-method-item" onclick="switchGatewayTab('netbanking', this)">
+                            <div class="ebz-method-icon">
+                                <i class="fa-solid fa-building-columns"></i>
+                            </div>
+                            <div class="ebz-method-content">
+                                <div class="ebz-method-name">NetBanking</div>
+                            </div>
+                        </div>
+
+                        <!-- 5. Wallets -->
+                        <div class="ebz-method-item" onclick="switchGatewayTab('wallets', this)">
+                            <div class="ebz-method-icon">
+                                <i class="fa-solid fa-wallet"></i>
+                            </div>
+                            <div class="ebz-method-content">
+                                <div class="ebz-method-name">Wallets</div>
+                                <div class="ebz-offer-badge">4 Offers Available</div>
+                            </div>
+                        </div>
+
+                        <!-- 6. EMI -->
+                        <div class="ebz-method-item" onclick="switchGatewayTab('emi', this)">
+                            <div class="ebz-method-icon">
+                                <i class="fa-solid fa-calendar-days"></i>
+                            </div>
+                            <div class="ebz-method-content">
+                                <div class="ebz-method-name">EMI</div>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <!-- RIGHT PANEL: DYNAMIC FORMS -->
+                    <div class="ebz-content-panel">
+                        
+                        <!-- OFFER STRIP -->
+                        <div class="ebz-offer-strip">
+                            <div class="ebz-offer-strip-left">
+                                <span class="ebz-badge-h">OFFER</span>
+                                <span>Save up to 10% on Evora Live Passes with Instant UPI</span>
+                            </div>
+                            <button class="ebz-btn-apply" onclick="alert('Demo promo applied: 0% fee.')">Applied</button>
+                        </div>
+
+                        <!-- VIEW 1: UPI & LIVE QR SCANNER TAB -->
+                        <div id="tab-content-upi" class="ebz-tab-pane" style="display: block;">
+                            
+                            <!-- Real-time QR Scanner Area -->
+                            <div id="ebz-qr-state-scan" style="text-align: center; padding: 10px 0;">
+                                <div style="font-size: 14px; font-weight: 600; color: #0f172a; margin-bottom: 4px;">
+                                    Scan QR Code using any UPI App
+                                </div>
+                                <p style="font-size: 12px; color: #64748b; margin: 0 0 14px 0;">Google Pay • PhonePe • Paytm • BHIM</p>
+
+                                <div style="display: flex; justify-content: center; margin-bottom: 12px;">
+                                    <div id="ebz-qrcode-box" class="ebz-qr-frame"></div>
+                                </div>
+
+                                <div style="font-size: 12px; color: #7c3aed; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 8px;">
+                                    <i class="fa-solid fa-circle-notch fa-spin"></i> Point your phone camera to scan & complete
+                                </div>
+                            </div>
+
+                            <!-- GPay Animated Checkmark Success Screen -->
+                            <div id="ebz-qr-state-success" class="ebz-gpay-success" style="display: none;">
+                                <div class="ebz-gpay-circle">
+                                    <i class="fa-solid fa-check"></i>
+                                </div>
+                                <h3 style="font-size: 20px; font-weight: 700; color: #0f172a; margin: 0 0 4px 0;">Payment Approved!</h3>
+                                <p style="font-size: 13px; color: #10b981; font-weight: 600; margin: 0 0 8px 0;">UPI / Bank Authorization Received</p>
+                                <p style="font-size: 12px; color: #64748b; margin: 0;">Generating verified passes & tax invoice...</p>
+                            </div>
+
+                        </div>
+
+                        <!-- VIEW 2: CREDIT / DEBIT CARD TAB -->
+                        <div id="tab-content-card" class="ebz-tab-pane" style="display: none;">
+                            <div style="font-size: 14px; font-weight: 600; color: #0f172a; margin-bottom: 14px;">Enter Card Details</div>
+
+                            <div class="ebz-form-group">
+                                <div class="ebz-input-card-box">
+                                    <i class="fa-regular fa-credit-card" style="color: #94a3b8;"></i>
+                                    <input type="text" placeholder="Card Number" value="4532 •••• •••• 8920" class="ebz-input">
+                                </div>
+                                <input type="text" placeholder="MM/YY" value="08/29" class="ebz-input" style="max-width: 110px;">
+                            </div>
+
+                            <div class="ebz-form-group" style="margin-top: 10px;">
+                                <input type="text" placeholder="Card Holder Name" id="ebz-cardholder-name" class="ebz-input">
+                                <input type="password" placeholder="CVV" value="•••" class="ebz-input" style="max-width: 110px;">
+                            </div>
+
+                            <p style="font-size: 11px; color: #94a3b8; margin-top: 10px;">
+                                <i class="fa-solid fa-lock"></i> Sample sandbox environment. Click Pay below to simulate instant approval.
+                            </p>
+                        </div>
+
+                        <!-- VIEW 3: NETBANKING / WALLETS TAB -->
+                        <div id="tab-content-other" class="ebz-tab-pane" style="display: none;">
+                            <div style="font-size: 14px; font-weight: 600; color: #0f172a; margin-bottom: 12px;">Select Popular Bank</div>
+                            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 15px;">
+                                <button type="button" class="ebz-bank-pill active">HDFC Bank</button>
+                                <button type="button" class="ebz-bank-pill">ICICI Bank</button>
+                                <button type="button" class="ebz-bank-pill">SBI</button>
+                                <button type="button" class="ebz-bank-pill">Axis Bank</button>
+                                <button type="button" class="ebz-bank-pill">Kotak</button>
+                                <button type="button" class="ebz-bank-pill">Other Banks</button>
+                            </div>
+                        </div>
+
+                        <!-- BOTTOM PAY BUTTON -->
+                        <div class="ebz-footer-action">
+                            <button id="ebz-btn-pay" onclick="triggerManualGatewaySuccess()" class="ebz-pay-btn">
+                                <i class="fa-solid fa-qrcode"></i> Scan QR on Phone
+                            </button>
+                            <div class="ebz-charges-note">₹ 0.00 Platform Charges • 256-Bit SSL Encrypted</div>
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <!-- MODAL FOOTER -->
+                <div class="ebz-modal-footer">
+                    <div class="ebz-footer-badges">
+                        <span><i class="fa-brands fa-cc-visa"></i> VISA</span>
+                        <span><i class="fa-brands fa-cc-mastercard"></i> MasterCard</span>
+                        <span><i class="fa-solid fa-shield-halved"></i> PCI-DSS</span>
+                    </div>
+                    <div class="ebz-powered-by">
+                        Powered By <strong>Easebuzz</strong> <span style="font-size: 10px; color:#94a3b8;">v 2.6.142</span>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- SCRIPTS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script src="{{ url_for('static', filename='eventsData.js') }}"></script>
+    <script>
+      let currentEvent = null;
+      let isInterested = false;
+      let activeGatewaySessionId = null;
+      let pollPaymentInterval = null;
+      let gatewayCountdownInterval = null;
+      let currentBookingPayload = null;
+
+      const tierData = {
+          regular:  { name: "Regular Pass",     price: 499,  qty: 0 },
+          silver:   { name: "Silver Zone",      price: 799,  qty: 0 },
+          gold:     { name: "Gold Deck",        price: 1199, qty: 0 },
+          premium:  { name: "Premium Lounge",   price: 1599, qty: 0 },
+          balcony:  { name: "Balcony View",     price: 1899, qty: 0 },
+          frontrow: { name: "Front Row VIP",    price: 2499, qty: 0 }
+      };
+
+      window.addEventListener('DOMContentLoaded', () => {
+          // NAVBAR AUTH CHECK
+          const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
+          const loggedOutNav = document.getElementById('nav-actions-logged-out');
+          const loggedInNav = document.getElementById('nav-actions-logged-in');
+
+          if (isLoggedIn) {
+              if (loggedOutNav) loggedOutNav.style.display = 'none';
+              if (loggedInNav) loggedInNav.style.display = 'flex';
+          }
+
+          const id = new URLSearchParams(window.location.search).get('id') || 1;
+          currentEvent = eventsDatabase.find(e => e.id == id) || eventsDatabase[0];
+
+          // Render Main Event Details
+          document.getElementById('event-title').innerText = currentEvent.title;
+          document.getElementById('event-banner-img').src = currentEvent.img;
+          document.getElementById('info-date').innerText = currentEvent.date + ' 2026';
+          document.getElementById('info-venue').innerText = currentEvent.venue;
+          document.getElementById('info-genre').innerText = currentEvent.cat.toUpperCase();
+          
+          // Adjust Base Price per tier dynamically based on Event's starting price
+          const base = currentEvent.price;
+          tierData.regular.price  = base;
+          tierData.silver.price   = base + 300;
+          tierData.gold.price     = base + 700;
+          tierData.premium.price  = base + 1100;
+          tierData.balcony.price  = base + 1400;
+          tierData.frontrow.price = base + 2000;
+
+          // Render Tier Prices in Modal
+          document.getElementById('info-price').innerText = `₹${base} onwards`;
+          document.getElementById('price-regular').innerText  = `₹ ${tierData.regular.price} per pass`;
+          document.getElementById('price-silver').innerText   = `₹ ${tierData.silver.price} per pass`;
+          document.getElementById('price-gold').innerText     = `₹ ${tierData.gold.price} per pass`;
+          document.getElementById('price-premium').innerText  = `₹ ${tierData.premium.price} per pass`;
+          document.getElementById('price-balcony').innerText  = `₹ ${tierData.balcony.price} per pass`;
+          document.getElementById('price-frontrow').innerText = `₹ ${tierData.frontrow.price} per pass`;
+
+          // Tags & Descriptions
+          document.getElementById('tag-category').innerText = currentEvent.cat.toUpperCase();
+          document.getElementById('tag-genre').innerText = currentEvent.banner || 'LIVE EVENT';
+
+          document.getElementById('event-about-text').innerText = 
+              `Experience ${currentEvent.title} live at ${currentEvent.venue}. Expect an exhilarating show filled with crowd favorites, top-tier audio production, and an energetic audience. Don't miss out on securing your spot for this exclusive event.`;
+
+          document.getElementById('artist-name').innerText = currentEvent.title.split('—')[0] || currentEvent.title;
+          document.getElementById('artist-avatar').src = currentEvent.img;
+
+          updateModalTotals();
+      });
+
+      function changeTierQty(tierKey, delta) {
+          if (tierData[tierKey]) {
+              tierData[tierKey].qty += delta;
+              if (tierData[tierKey].qty < 0) tierData[tierKey].qty = 0;
+              if (tierData[tierKey].qty > 10) tierData[tierKey].qty = 10;
+              document.getElementById(`qty-${tierKey}`).innerText = tierData[tierKey].qty;
+              updateModalTotals();
+          }
+      }
+
+      function updateModalTotals() {
+          let totalQty = 0;
+          let subtotal = 0;
+
+          Object.keys(tierData).forEach(key => {
+              totalQty += tierData[key].qty;
+              subtotal += (tierData[key].qty * tierData[key].price);
+          });
+
+          const fee = totalQty > 0 ? (totalQty * 40) : 0;
+          const grandTotal = subtotal + fee;
+
+          document.getElementById('summary-total-qty').innerText = totalQty;
+          document.getElementById('summary-subtotal').innerText = `₹ ${subtotal}`;
+          document.getElementById('summary-fee').innerText = `₹ ${fee}`;
+          document.getElementById('summary-grandtotal').innerText = `₹ ${grandTotal}`;
+      }
+
+      function toggleInterest() {
+          const btn = document.getElementById('btn-interest');
+          const counter = document.getElementById('interest-count');
+          let count = parseInt(counter.innerText);
+
+          if (!isInterested) {
+              isInterested = true;
+              btn.innerText = "Interested ✓";
+              btn.classList.add('active');
+              counter.innerText = count + 1;
+          } else {
+              isInterested = false;
+              btn.innerText = "I'm Interested";
+              btn.classList.remove('active');
+              counter.innerText = count - 1;
+          }
+      }
+
+      function shareEvent() {
+          if (navigator.share) {
+              navigator.share({
+                  title: currentEvent.title,
+                  url: window.location.href
+              });
+          } else {
+              navigator.clipboard.writeText(window.location.href);
+              alert("Event link copied to clipboard!");
+          }
+      }
+
+      function openTicketModal() {
+          document.getElementById('ticket-modal').classList.add('active');
+      }
+
+      function closeTicketModal() {
+          document.getElementById('ticket-modal').classList.remove('active');
+      }
+
+      // TAB SWITCHING LOGIC
+      function switchGatewayTab(tabKey, element) {
+          document.querySelectorAll('.ebz-method-item').forEach(el => el.classList.remove('active'));
+          element.classList.add('active');
+
+          document.getElementById('tab-content-upi').style.display = 'none';
+          document.getElementById('tab-content-card').style.display = 'none';
+          document.getElementById('tab-content-other').style.display = 'none';
+
+          const payBtn = document.getElementById('ebz-btn-pay');
+
+          if (tabKey === 'upi') {
+              document.getElementById('tab-content-upi').style.display = 'block';
+              payBtn.classList.remove('ready');
+              payBtn.innerHTML = `<i class="fa-solid fa-qrcode"></i> Scan QR on Phone`;
+          } else if (tabKey === 'card' || tabKey === 'debit') {
+              document.getElementById('tab-content-card').style.display = 'block';
+              payBtn.classList.add('ready');
+              payBtn.innerHTML = `<i class="fa-solid fa-shield-halved"></i> Pay <span id="ebz-btn-amount">₹${currentBookingPayload.total_price.toLocaleString('en-IN', {minimumFractionDigits: 2})}</span>`;
+          } else {
+              document.getElementById('tab-content-other').style.display = 'block';
+              payBtn.classList.add('ready');
+              payBtn.innerHTML = `<i class="fa-solid fa-shield-halved"></i> Pay <span id="ebz-btn-amount">₹${currentBookingPayload.total_price.toLocaleString('en-IN', {minimumFractionDigits: 2})}</span>`;
+          }
+      }
+
+      // MAIN BOOKING TRIGGER
+      async function processBooking() {
+          const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
+          if (!isLoggedIn) {
+              alert("⚠️ Please log in to your Evora account before booking passes.");
+              window.location.href = '/login';
+              return;
+          }
+
+          let totalQty = 0;
+          let subtotal = 0;
+          let individualItems = [];
+
+          Object.keys(tierData).forEach(k => {
+              const count = tierData[k].qty;
+              if (count > 0) {
+                  totalQty += count;
+                  subtotal += (count * tierData[k].price);
+                  for (let i = 0; i < count; i++) {
+                      individualItems.push({
+                          tier_key: k,
+                          tier_name: tierData[k].name,
+                          price: tierData[k].price
+                      });
+                  }
+              }
+          });
+
+          if (totalQty === 0) {
+              alert("Please select at least 1 ticket pass to proceed.");
+              return;
+          }
+
+          const fee = totalQty * 40;
+          const grandTotal = subtotal + fee;
+
+          currentBookingPayload = {
+              booking_type: 'passes',
+              event_id: currentEvent.id || 1,
+              title: currentEvent.title,
+              details: currentEvent.venue,
+              booking_date: currentEvent.date + ' 2026',
+              total_price: grandTotal,
+              individual_items: individualItems
+          };
+
+          try {
+              // 1. Create QR session on Flask backend
+              const res = await fetch('/api/payment/create-qr-session', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  credentials: 'include',
+                  body: JSON.stringify(currentBookingPayload)
+              });
+              const sessionData = await res.json();
+
+              if (!res.ok || sessionData.status !== 'success') {
+                  alert(sessionData.message || "Failed to initialize payment session.");
+                  return;
+              }
+
+              activeGatewaySessionId = sessionData.session_id;
+
+              // 2. Populate Gateway Headers
+              closeTicketModal();
+              document.getElementById('ebz-display-trid').innerText = activeGatewaySessionId;
+              const userName = localStorage.getItem('userName') || 'Evora Customer';
+              document.getElementById('ebz-cardholder-name').value = userName;
+
+              // 3. Render Live Dynamic QR
+              const qrContainer = document.getElementById('ebz-qrcode-box');
+              qrContainer.innerHTML = '';
+              document.getElementById('ebz-qr-state-scan').style.display = 'block';
+              document.getElementById('ebz-qr-state-success').style.display = 'none';
+
+              new QRCode(qrContainer, {
+                  text: sessionData.pay_url,
+                  width: 165,
+                  height: 165,
+                  colorDark: "#0f172a",
+                  colorLight: "#ffffff",
+                  correctLevel: QRCode.CorrectLevel.H
+              });
+
+              // 4. Start 15-Minute Countdown Timer
+              startGatewayTimer(14 * 60 + 59);
+
+              // 5. Open Gateway Modal
+              document.getElementById('evora-gateway-modal').style.display = 'flex';
+
+              // 6. Poll server for phone scan approval
+              if (pollPaymentInterval) clearInterval(pollPaymentInterval);
+              pollPaymentInterval = setInterval(async () => {
+                  try {
+                      const checkRes = await fetch(`/api/payment/check-status/${activeGatewaySessionId}`);
+                      const statusData = await checkRes.json();
+
+                      if (statusData.status === 'PAID') {
+                          clearInterval(pollPaymentInterval);
+                          executePaymentFinalization(activeGatewaySessionId);
+                      }
+                  } catch (e) {
+                      console.error("Polling error", e);
+                  }
+              }, 1500);
+
+          } catch (err) {
+              alert("Connection error during payment initialization.");
+          }
+      }
+
+      // SIMULATE INSTANT APPROVAL FOR CARD / NETBANKING TABS
+      async function triggerManualGatewaySuccess() {
+          const payBtn = document.getElementById('ebz-btn-pay');
+          payBtn.disabled = true;
+          payBtn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Processing Authorization...`;
+
+          setTimeout(async () => {
+              await executePaymentFinalization(activeGatewaySessionId || `PAY-CARD-${Date.now().toString().slice(-6)}`);
+          }, 1200);
+      }
+
+      // EXECUTES GPAY ANIMATION & DATABASE PERSISTENCE
+      async function executePaymentFinalization(paymentRef) {
+          if (pollPaymentInterval) clearInterval(pollPaymentInterval);
+          if (gatewayCountdownInterval) clearInterval(gatewayCountdownInterval);
+
+          // Switch to GPay animation
+          document.getElementById('tab-content-card').style.display = 'none';
+          document.getElementById('tab-content-other').style.display = 'none';
+          document.getElementById('tab-content-upi').style.display = 'block';
+          document.getElementById('ebz-qr-state-scan').style.display = 'none';
+          document.getElementById('ebz-qr-state-success').style.display = 'block';
+
+          const verifyRes = await fetch('/api/payment/verify-and-book', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              credentials: 'include',
+              body: JSON.stringify({
+                  ...currentBookingPayload,
+                  razorpay_payment_id: paymentRef
+              })
+          });
+          const verifyData = await verifyRes.json();
+
+          setTimeout(() => {
+              window.location.href = '/dashboard';
+          }, 1800);
+      }
+
+      function startGatewayTimer(duration) {
+          let timer = duration;
+          const display = document.getElementById('ebz-countdown-timer');
+          if (gatewayCountdownInterval) clearInterval(gatewayCountdownInterval);
+
+          gatewayCountdownInterval = setInterval(() => {
+              let minutes = parseInt(timer / 60, 10);
+              let seconds = parseInt(timer % 60, 10);
+
+              minutes = minutes < 10 ? "0" + minutes : minutes;
+              seconds = seconds < 10 ? "0" + seconds : seconds;
+
+              display.textContent = minutes + ":" + seconds;
+
+              if (--timer < 0) {
+                  clearInterval(gatewayCountdownInterval);
+                  closeGatewayModal();
+                  alert("Payment session expired. Please try again.");
+              }
+          }, 1000);
+      }
+
+      function closeGatewayModal() {
+          if (pollPaymentInterval) clearInterval(pollPaymentInterval);
+          if (gatewayCountdownInterval) clearInterval(gatewayCountdownInterval);
+          document.getElementById('evora-gateway-modal').style.display = 'none';
+      }
+    </script>
+</body>
+</html>

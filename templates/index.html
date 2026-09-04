@@ -1,0 +1,799 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Evora — Discover Events That Move You</title>
+
+    <!-- DIRECT ROOT-RELATIVE PATHS FOR FLASK -->
+    <link rel="icon" type="image/png" href="/static/images/E for evora.png">
+    <link rel="stylesheet" href="{{ url_for('static', filename='global.css') }}">    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <script src="/static/eventsData.js"></script>
+</head>
+<body>
+
+    <!-- BACKGROUND GRAPHICS ENGINE -->
+    <div class="honeycomb-background-engine" id="honeycomb-bg"></div>
+
+    <!-- MODERN REPROPORTIONED NAV CAPSULE -->
+    <nav class="sticky-navbar" id="evora-navbar">
+        <div class="nav-container">
+            
+            <!-- LOGO GROUP -->
+            <a href="/" class="nav-logo-group" style="display: flex; align-items: center; gap: 10px; text-decoration: none;">
+                <div class="nav-logo-spacer" style="width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; overflow: visible;">
+                    <img src="{{ url_for('static', filename='images/E for evora.png') }}" alt="Evora" class="nav-branded-logo-img" style="width: 100%; height: 100%; object-fit: contain; transform: scale(1.15);" onerror="this.style.display='none'">
+                </div>  
+                <span class="nav-logo-text" style="font-size: 24px; font-weight: 700;">evora</span>
+            </a>
+
+            <!-- MAIN NAVIGATION LINKS -->
+            <div class="nav-links">
+                <a href="/events" class="nav-item">Events</a>
+                <a href="/venues" class="nav-item">Venues</a>
+                <a href="/manpower" class="nav-item premium-glow-text">Hire Staff</a>
+                <a href="/planner"class="nav-item">Plan My Event</a>
+                <a href="/contact" class="nav-item">Contact</a>
+            </div>
+            
+            <!-- LOGGED-OUT STATE BUTTONS -->
+            <div class="nav-actions" id="nav-actions-logged-out">
+                <a href="/login" class="btn-nav-login">Login</a>
+                <a href="/signup" class="btn-nav-signup">Sign Up</a>
+            </div>
+
+            <!-- LOGGED-IN STATE BUTTON (HIDDEN BY DEFAULT) -->
+            <div class="nav-actions" id="nav-actions-logged-in" style="display: none;">
+                <a href="/dashboard" class="btn-nav-signup">
+                    <i class="fa-solid fa-user"></i> My Dashboard
+                </a>
+            </div>
+
+        </div>
+    </nav>
+
+    <!-- SCALABLE COMPONENT HOST CONTAINER -->
+    <main class="homepage-container">
+        
+        <!-- SECTION 1: HERO HUB ARCHITECTURE -->
+        <section class="hero-layout">
+            
+            <!-- LEFT LAYOUT CORE -->
+            <div class="hero-left">
+                <!-- PREMIUM UPGRADED MOTION BADGE -->
+                <div class="smart-badge will-animate">
+                    <div class="badge-shimmer-track"></div>
+                    <span class="badge-icon-pulsing"></span> 
+                    <span class="badge-text-content">Smart Events. Seamless Experiences.</span>
+                </div>
+                
+                <h1 class="hero-title">Discover Events<br>That <span class="gradient-text">Move You</span></h1>
+                <p class="hero-description">
+                    Concerts, festivals, workshops, manpower and venues – all in one place. Book smart, experience more.
+                </p>
+                
+                <div class="hero-cta-group">
+                    <a href="/events" class="btn-primary-gradient">Explore Events <i class="fa-solid fa-arrow-trend-up btn-arrow-icon"></i></a>
+                    <a href="/events" class="btn-secondary-outline">Find Your Perfect Event</a>
+                </div>
+                
+                <!-- PLAYLIST MEDIA CARRIER PANEL -->
+                <div class="hero-player-card glass-panel will-animate">
+                    <div class="player-left-block">
+                        <audio id="main-audio-stream" src="{{ url_for('static', filename='audios/Wavy.mp3') }}"></audio>
+                        
+                        <img src="{{ url_for('static', filename='images/KA wavy.jpg') }}" alt="Track Cover" class="player-avatar" id="player-track-avatar">
+                        <div class="player-details">
+                            <span class="player-track-name" id="player-track-name">Karan Aujla</span>
+                            <span class="player-album-title" id="player-album-title">WAVY</span>
+                            <div class="player-timeline">
+                                <span class="time-stamp" id="stream-current-time">00:00</span>
+                                <div class="timeline-track-container" style="overflow: visible;">
+                                    <input type="range" id="stream-progress-slider" min="0" max="100" value="0" step="0.1">
+                                </div>
+                                <span class="time-stamp" id="stream-total-duration">00:00</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="player-right-block">
+                        <button class="favorite-heart-btn active-state"><i class="fa-solid fa-heart"></i></button>
+                        <div class="player-playback-controls">
+                            <button class="ctrl-btn micro-scale" id="stream-prev-btn"><i class="fa-solid fa-backward-step"></i></button>
+                            <button class="ctrl-btn play-pause-ring micro-scale" id="stream-play-trigger"><i class="fa-solid fa-play" id="stream-play-icon"></i></button>
+                            <button class="ctrl-btn micro-scale" id="stream-next-btn"><i class="fa-solid fa-forward-step"></i></button>
+                        </div>
+                        <div class="visualizer-bars-container" id="stream-visualizer-engine">
+                            <span class="bar-line-anim" style="--delay: 0.1s;"></span>
+                            <span class="bar-line-anim" style="--delay: 0.4s;"></span>
+                            <span class="bar-line-anim" style="--delay: 0.2s;"></span>
+                            <span class="bar-line-anim" style="--delay: 0.5s;"></span>
+                            <span class="bar-line-anim" style="--delay: 0.3s;"></span>
+                            <span class="bar-line-anim" style="--delay: 0.6s;"></span>
+                            <span class="bar-line-anim" style="--delay: 0.15s;"></span>
+                            <span class="bar-line-anim" style="--delay: 0.35s;"></span>
+                        </div>
+                    </div>
+                </div>
+               
+                <!-- COHESIVE BUTTON GROUP GAP FILLER -->
+                <div class="player-shortcuts-bar will-animate">
+                    <a href="/events?category=music" class="shortcut-tab-btn glass-panel micro-scale">
+                        <span class="tab-icon-badge variant-pink"><i class="fa-solid fa-fire"></i></span>
+                        <div class="tab-meta-text">
+                            <h5>Trending Artists</h5>
+                            <p>Explore hot tracking charts</p>
+                        </div>
+                    </a>
+
+                    <a href="/venues" class="shortcut-tab-btn glass-panel micro-scale">
+                        <span class="tab-icon-badge variant-purple"><i class="fa-solid fa-location-dot"></i></span>
+                        <div class="tab-meta-text">
+                            <h5>Nearby Venues</h5>
+                            <p>Find smart event spaces</p>
+                        </div>
+                    </a>
+
+                    <a href="/events" class="shortcut-tab-btn glass-panel micro-scale">
+                        <span class="tab-icon-badge variant-blue"><i class="fa-solid fa-radio"></i></span>
+                        <div class="tab-meta-text">
+                            <h5>Live Audio Streams</h5>
+                            <p>Tune into active rooms</p>
+                        </div>
+                    </a>
+                </div>
+            </div>
+
+            <!-- RIGHT COLUMN STACK -->
+            <div class="hero-right-stack">
+                <div class="concert-deck-container">
+                    <div class="deck-bg-card back" style="background-image: url('https://images.unsplash.com/photo-1540039155733-5bb30b53aa14?w=400');"></div>
+                    <div class="deck-bg-card middle" style="background-image: url('https://images.unsplash.com/photo-1506157786151-b8491531f063?w=400');"></div>
+                    
+                    <div class="deck-main-card glass-panel will-animate">
+                        <img src="https://images.unsplash.com/photo-1459749411175-04bf5292ceea?w=600" alt="Concert Stage" class="deck-main-img">
+                        <div class="deck-overlay-hud">
+                            <div class="track-header-meta">
+                                <h3>Concert Mode</h3>
+                                <p>Immersive Experience • Only on Evora</p>
+                            </div>
+                            <div class="deck-media-player-widget">
+                                <div class="player-hud-controls">
+                                    <button class="player-hud-btn icon-small micro-scale"><i class="fa-solid fa-backward-step"></i></button>
+                                    <a href="/events" class="player-hud-btn play-circle-accent micro-scale"><i class="fa-solid fa-play"></i></a>
+                                    <button class="player-hud-btn icon-small micro-scale"><i class="fa-solid fa-forward-step"></i></button>
+                                </div>
+                                <div class="player-hud-timeline-row">
+                                    <span class="hud-time">00:00</span>
+                                    <div class="hud-timeline-track">
+                                        <div class="hud-timeline-fill" style="width: 25%;"></div>
+                                    </div>
+                                    <span class="hud-time">03:20</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="split-cards-row">
+                    <a href="/events" class="mini-feature-card glass-panel clean-redirect will-animate">
+                        <div class="mini-card-top-row">
+                            <div class="mini-icon-wrapper variant-pink"><i class="fa-solid fa-ticket-simple"></i></div>
+                            <div class="mini-card-meta-block">
+                                <h4>Live Ticket Pass</h4>
+                                <p>Real-time Gen Animation</p>
+                            </div>
+                        </div>
+                        <div class="mini-card-footer-action">
+                            <span class="action-caption">View Live Pass</span>
+                            <div class="action-circle-btn"><i class="fa-solid fa-arrow-right"></i></div>
+                        </div>
+                    </a>
+
+                    <a href="/venues" class="mini-feature-card glass-panel clean-redirect will-animate">
+                        <div class="mini-card-top-row">
+                            <div class="mini-icon-wrapper variant-purple"><i class="fa-solid fa-chair"></i></div>
+                            <div class="mini-card-meta-block">
+                                <h4>Interactive Seating</h4>
+                                <p>Smart Allocation Matrix</p>
+                            </div>
+                        </div>
+                        <div class="mini-card-footer-action">
+                            <span class="action-caption">Reserve Seat</span>
+                            <div class="action-circle-btn"><i class="fa-solid fa-arrow-right"></i></div>
+                        </div>
+                    </a>
+
+                    <a href="./planner.html" class="mini-feature-card glass-panel clean-redirect full-width-row will-animate">
+                        <div class="mini-card-top-row">
+                            <div class="mini-icon-wrapper variant-pink"><i class="fa-solid fa-calendar-days"></i></div>
+                            <div class="mini-card-meta-block">
+                                <h4>Your Personal Events</h4>
+                                <p>Custom Saved Experiences</p>
+                            </div>
+                        </div>
+                        <div class="mini-card-footer-action">
+                            <span class="action-caption">Manage My Events</span>
+                            <div class="action-circle-btn"><i class="fa-solid fa-arrow-right"></i></div>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 2: FULL WIDTH STATS TICKER STRIP -->
+        <div class="stats-strip glass-panel full-width-strip will-animate">
+            <div class="stat-item">
+                <div class="stat-icon-wrap variant-purple"><i class="fa-regular fa-calendar-check"></i></div>
+                <div class="stat-meta"><h3>25K+</h3><p>Events</p></div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-icon-wrap variant-pink"><i class="fa-solid fa-music"></i></div>
+                <div class="stat-meta"><h3>10K+</h3><p>Artists</p></div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-icon-wrap variant-orange"><i class="fa-regular fa-face-smile"></i></div>
+                <div class="stat-meta"><h3>2.5M+</h3><p>Happy Users</p></div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-icon-wrap variant-blue"><i class="fa-solid fa-building-shield"></i></div>
+                <div class="stat-meta"><h3>5K+</h3><p>Venues</p></div>
+            </div>
+        </div>
+
+        <!-- SECTION 3: FEATURED CONCERT ARTISTS -->
+        <section class="artists-row-gallery" id="concerts-row-display">
+            <div class="section-header">
+                <h2>Live Concert Artists</h2>
+                <a href="/events?category=music" class="see-all-link">
+                    show all concerts <i class="fa-solid fa-arrow-right"></i>
+                </a>
+            </div>
+
+            <div class="compact-artists-grid-row">
+                <!-- Karan Aujla (ID: 1) -->
+                <a href="/event-detail?id=1" class="artist-anchor-card glass-panel micro-scale" id="concert-stage-karan">
+                    <div class="artist-avatar-wrap">
+                        <img src="{{ url_for('static', filename='images/karan.jpeg') }}" alt="Karan Aujla">
+                    </div>
+                    <h4>Karan Aujla</h4>
+                    <p>WAVY Tour</p>
+                    <div class="jump-action-indicator">
+                        <span>Book Ticket</span> <i class="fa-solid fa-arrow-trend-up"></i>
+                    </div>
+                </a>
+
+                <!-- Diljit Dosanjh (ID: 4) -->
+                <a href="/event-detail?id=4" class="artist-anchor-card glass-panel micro-scale" id="concert-stage-diljit">
+                    <div class="artist-avatar-wrap">
+                        <img src="{{ url_for('static', filename='images/diljit.jpeg') }}" alt="Diljit Dosanjh">
+                    </div>
+                    <h4>Diljit Dosanjh</h4>
+                    <p>Dil-Luminati</p>
+                    <div class="jump-action-indicator">
+                        <span>Book Ticket</span> <i class="fa-solid fa-arrow-trend-up"></i>
+                    </div>
+                </a>
+
+                <!-- AP Dhillon (ID: 6) -->
+                <a href="/event-detail?id=6" class="artist-anchor-card glass-panel micro-scale">
+                    <div class="artist-avatar-wrap">
+                        <img src="{{ url_for('static', filename='images/AP.avif') }}" alt="AP Dhillon">
+                    </div>
+                    <h4>AP Dhillon</h4>
+                    <p>Excuses Tour</p>
+                    <div class="jump-action-indicator">
+                        <span>Book Ticket</span> <i class="fa-solid fa-arrow-trend-up"></i>
+                    </div>
+                </a>
+
+                <!-- Arijit Singh (ID: 3) -->
+                <a href="/event-detail?id=3" class="artist-anchor-card glass-panel micro-scale">
+                    <div class="artist-avatar-wrap">
+                        <img src="{{ url_for('static', filename='images/arjit.jpeg') }}" alt="Arijit Singh">
+                    </div>
+                    <h4>Arijit Singh</h4>
+                    <p>Soulful Night</p>
+                    <div class="jump-action-indicator">
+                        <span>Book Ticket</span> <i class="fa-solid fa-arrow-trend-up"></i>
+                    </div>
+                </a>
+
+                <!-- Alan Walker (ID: 5) -->
+                <a href="/event-detail?id=5" class="artist-anchor-card glass-panel micro-scale">
+                    <div class="artist-avatar-wrap">
+                        <img src="{{ url_for('static', filename='images/alan.jpeg') }}" alt="Alan Walker">
+                    </div>
+                    <h4>Alan Walker</h4>
+                    <p>Sunburn Arena</p>
+                    <div class="jump-action-indicator">
+                        <span>Book Ticket</span> <i class="fa-solid fa-arrow-trend-up"></i>
+                    </div>
+                </a>
+
+                <!-- Coldplay (ID: 2) -->
+                <a href="/event-detail?id=2" class="artist-anchor-card glass-panel micro-scale">
+                    <div class="artist-avatar-wrap">
+                        <img src="{{ url_for('static', filename='images/cold play.jpeg') }}" alt="Coldplay">
+                    </div>
+                    <h4>Coldplay</h4>
+                    <p>Spheres Tour</p>
+                    <div class="jump-action-indicator">
+                        <span>Book Ticket</span> <i class="fa-solid fa-arrow-trend-up"></i>
+                    </div>
+                </a>
+
+                <!-- King (ID: 7) -->
+                <a href="/event-detail?id=7" class="artist-anchor-card glass-panel micro-scale">
+                    <div class="artist-avatar-wrap">
+                        <img src="{{ url_for('static', filename='images/king.webp') }}" alt="King">
+                    </div>
+                    <h4>King</h4>
+                    <p>Rocco Live</p>
+                    <div class="jump-action-indicator">
+                        <span>Book Ticket</span> <i class="fa-solid fa-arrow-trend-up"></i>
+                    </div>
+                </a>
+            </div>
+        </section>
+
+        <!-- SECTION 4: BROWSE CATEGORIES MODULE -->
+        <section class="category-section">
+            <div class="section-header">
+                <h2>Browse Categories</h2>
+            </div>
+            <div class="category-slider-wrapper">
+                <div class="category-slider-track" id="cat-slider-track">
+                    
+                    <a href="/events?category=music" class="premium-cat-btn variant-music will-animate">
+                        <div class="cat-card-content">
+                            <h3>MUSIC<br>SHOWS</h3>
+                            <span class="cat-event-count">10+ Events</span>
+                        </div>
+                        <div class="cat-graphic-overlay"><i class="fa-solid fa-headphones-simple"></i></div>
+                    </a>
+                    
+                    <a href="/events?category=comedy" class="premium-cat-btn variant-comedy will-animate">
+                        <div class="cat-card-content">
+                            <h3>COMEDY<br>SHOWS</h3>
+                            <span class="cat-event-count">10+ Events</span>
+                        </div>
+                        <div class="cat-graphic-overlay"><i class="fa-solid fa-face-laugh-beam"></i></div>
+                    </a>
+                    
+                    <a href="/events?category=theatre" class="premium-cat-btn variant-theatre will-animate">
+                        <div class="cat-card-content">
+                            <h3>THEATRE<br>SHOWS</h3>
+                            <span class="cat-event-count">10+ Events</span>
+                        </div>
+                        <div class="cat-graphic-overlay"><i class="fa-solid fa-masks-theater"></i></div>
+                    </a>
+
+                    <a href="/events?category=workshops" class="premium-cat-btn variant-workshops will-animate">
+                        <div class="cat-card-content">
+                            <h3>WORKSHOPS<br>& MORE</h3>
+                            <span class="cat-event-count">10+ Events</span>
+                        </div>
+                        <div class="cat-graphic-overlay"><i class="fa-solid fa-palette"></i></div>
+                    </a>
+
+                    <a href="/events?category=interactive" class="premium-cat-btn variant-games will-animate">
+                        <div class="cat-card-content">
+                            <h3>INTERACTIVE<br>GAMES</h3>
+                            <span class="cat-event-count">10+ Events</span>
+                        </div>
+                        <div class="cat-graphic-overlay"><i class="fa-solid fa-gamepad"></i></div>
+                    </a>
+
+                    <a href="/events?category=adventure" class="premium-cat-btn variant-adventure will-animate">
+                        <div class="cat-card-content">
+                            <h3>ADVENTURE<br>& FUN</h3>
+                            <span class="cat-event-count">10+ Events</span>
+                        </div>
+                        <div class="cat-graphic-overlay"><i class="fa-solid fa-mountain-sun"></i></div>
+                    </a>
+
+                    <a href="/events?category=amusement" class="premium-cat-btn variant-amusement will-animate">
+                        <div class="cat-card-content">
+                            <h3>AMUSEMENT<br>PARK</h3>
+                            <span class="cat-event-count">10+ Events</span>
+                        </div>
+                        <div class="cat-graphic-overlay"><i class="fa-solid fa-ferry"></i></div>
+                    </a>
+
+                    <a href="/events?category=art" class="premium-cat-btn variant-art will-animate">
+                        <div class="cat-card-content">
+                            <h3>ART &<br>CRAFTS</h3>
+                            <span class="cat-event-count">10+ Events</span>
+                        </div>
+                        <div class="cat-graphic-overlay"><i class="fa-solid fa-paint-brush"></i></div>
+                    </a>
+
+                </div>
+            </div>
+
+            <button class="slider-arrow-btn next-arrow glass-panel micro-scale" id="cat-slide-next-trigger" aria-label="Slide Next">
+                <i class="fa-solid fa-chevron-right"></i>
+            </button>
+        </section>
+
+        <!-- SECTION 5: WHY EVORA FEATURES HIGHLIGHT STRIP -->
+        <section class="why-evora-section">
+            <div class="section-header">
+                <h2>Why Evora?</h2>
+            </div>
+            <div class="features-capsule-row">
+                <div class="feature-capsule-card glass-panel will-animate">
+                    <div class="feature-icon-badge"><i class="fa-solid fa-brain"></i></div>
+                    <div class="feature-meta-block">
+                        <h4>Smart Discovery</h4>
+                        <p>AI powered recommendations</p>
+                    </div>
+                </div>
+
+                <div class="feature-capsule-card glass-panel will-animate">
+                    <div class="feature-icon-badge"><i class="fa-solid fa-masks-theater"></i></div>
+                    <div class="feature-meta-block">
+                        <h4>Live Experiences</h4>
+                        <p>Concert Mode for immersive vibes</p>
+                    </div>
+                </div>
+
+                <div class="feature-capsule-card glass-panel will-animate">
+                    <div class="feature-icon-badge"><i class="fa-solid fa-ticket-simple"></i></div>
+                    <div class="feature-meta-block">
+                        <h4>Seamless Booking</h4>
+                        <p>Fast, secure & hassle-free</p>
+                    </div>
+                </div>
+
+                <div class="feature-capsule-card glass-panel will-animate">
+                    <div class="feature-icon-badge"><i class="fa-solid fa-layer-group"></i></div>
+                    <div class="feature-meta-block">
+                        <h4>Multiple Choices</h4>
+                        <p>Events & venues in one place</p>
+                    </div>
+                </div>
+
+                <div class="feature-capsule-card glass-panel will-animate">
+                    <div class="feature-icon-badge"><i class="fa-solid fa-shield-halved"></i></div>
+                    <div class="feature-meta-block">
+                        <h4>Trusted Platform</h4>
+                        <p>Loved by millions of users</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 6: TESTIMONIAL MATRIX -->
+        <section class="testimonials-section">
+            <div class="section-header">
+                <h2>What People Say</h2>
+            </div>
+            
+            <div class="testimonials-three-column-grid">
+                <div class="testimonial-card glass-panel will-animate">
+                    <div class="quote-mark-icon"><i class="fa-solid fa-quote-left"></i></div>
+                    <p class="review-body-text">
+                        Amazing experience! Booking tickets has never been this smooth.
+                    </p>
+                    <div class="star-rating-row">
+                        <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
+                    </div>
+                    <div class="reviewer-profile-hud">
+                        <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150" alt="Ananya Sharma" class="reviewer-avatar">
+                        <div class="reviewer-meta">
+                            <h5>Ananya Sharma</h5>
+                            <p>Attended Coldplay Live</p>
+                        </div>
+                    </div>
+                    <div class="card-ambient-purple-glow"></div>
+                </div>
+
+                <div class="testimonial-card glass-panel will-animate">
+                    <div class="quote-mark-icon"><i class="fa-solid fa-quote-left"></i></div>
+                    <p class="review-body-text">
+                        Evora's Concert Mode is a total game changer. Feels like you're already at the concert!
+                    </p>
+                    <div class="star-rating-row">
+                        <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
+                    </div>
+                    <div class="reviewer-profile-hud">
+                        <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150" alt="Rohit Mehra" class="reviewer-avatar">
+                        <div class="reviewer-meta">
+                            <h5>Rohit Mehra</h5>
+                            <p>Attended Diljit Dosanjh Live</p>
+                        </div>
+                    </div>
+                    <div class="card-ambient-purple-glow"></div>
+                </div>
+
+                <div class="testimonial-card glass-panel will-animate">
+                    <div class="quote-mark-icon"><i class="fa-solid fa-quote-left"></i></div>
+                    <p class="review-body-text">
+                        Found the perfect event through Evora. Super helpful platform!
+                    </p>
+                    <div class="star-rating-row">
+                        <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
+                    </div>
+                    <div class="reviewer-profile-hud">
+                        <img src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150" alt="Neha Verma" class="reviewer-avatar">
+                        <div class="reviewer-meta">
+                            <h5>Neha Verma</h5>
+                            <p>Workshop Attendee</p>
+                        </div>
+                    </div>
+                    <div class="card-ambient-purple-glow"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 7: NEWSLETTER BANNER -->
+        <section class="newsletter-subscription-banner will-animate">
+            <div class="newsletter-left-text-block">
+                <h3>Don't Miss Out on Amazing Events</h3>
+                <p>Subscribe now and stay updated!</p>
+            </div>
+            
+            <div class="newsletter-right-input-form">
+                <form class="premium-input-box-wrapper" onsubmit="event.preventDefault();">
+                    <input type="email" placeholder="Enter your email" class="newsletter-email-field" required>
+                    <button type="submit" class="btn-newsletter-submit">Subscribe</button>
+                </form>
+            </div>
+
+            <div class="floating-mail-graphics-hud">
+                <i class="fa-solid fa-envelope-open-text"></i>
+            </div>
+        </section>
+
+        <!-- SECTION 8: PLATFORM FOOTER -->
+        <footer class="evora-platform-footer">
+            <div class="footer-master-grid-container">
+                
+                <div class="footer-brand-info-column">
+                    <a href="/" class="nav-logo-group" style="margin-left: -12px;">
+                        <div class="nav-logo-spacer" style="width: 48px; height: 48px;">
+                            <img src="{{ url_for('static', filename='images/E for evora.png') }}" alt="Evora" class="nav-branded-logo-img" onerror="this.style.display='none'">
+                        </div>
+                        <span class="nav-logo-text" style="font-size: 22px;">evora</span>
+                    </a>
+                    <p class="footer-brand-bio-text">
+                        Your gateway to unforgettable events and venues.
+                    </p>
+                </div>
+
+                <div class="footer-navigation-resource-column">
+                    <h5>Quick Links</h5>
+                    <ul class="footer-links-list-node">
+                        <li><a href="/events">Events</a></li>
+                        <li><a href="/venues">Venues</a></li>
+                        <li><a href="/manpower">Hire Staff</a></li>
+                        <li><a href="/contact">Contact</a></li>
+                    </ul>
+                </div>
+
+                <div class="footer-navigation-resource-column">
+                    <h5>For Users</h5>
+                    <ul class="footer-links-list-node">
+                        <li><a href="/dashboard">My Dashboard</a></li>
+                        <li><a href="/login">Login</a></li>
+                        <li><a href="/signup">Sign Up</a></li>
+                    </ul>
+                </div>
+
+            </div>
+
+            <div class="footer-base-copyright-strip">
+                <p>&copy; 2026 Evora Platform Inc. All rights reserved.</p>
+            </div>
+        </footer>       
+    </main>
+
+    <!-- SYSTEM SCRIPT CONTROLLERS -->
+    <script>
+        const honeycombBg = document.getElementById('honeycomb-bg');
+
+        function generateBokehMatrix() {
+            if (!honeycombBg) return;
+            honeycombBg.innerHTML = '';
+            const width = window.innerWidth;
+            const height = window.innerHeight;
+            const size = 44;
+            
+            const cols = Math.ceil(width / size) + 2;
+            const rows = Math.ceil(height / size) + 2;
+            
+            const fragment = document.createDocumentFragment();
+            const totalCells = cols * rows;
+            for (let i = 0; i < totalCells; i++) {
+                const cell = document.createElement('div');
+                cell.className = 'hex-cell';
+                fragment.appendChild(cell);
+            }
+            honeycombBg.appendChild(fragment);
+        }
+
+        generateBokehMatrix();
+        
+        window.addEventListener('resize', generateBokehMatrix, { passive: true });
+        window.addEventListener('scroll', function() {
+            const navbar = document.getElementById('evora-navbar');
+            if (!navbar) return;
+            
+            if (window.scrollY > 40) {
+                navbar.classList.add('scrolled');
+            } else {
+                navbar.classList.remove('scrolled');
+            }
+        }, { passive: true });
+
+        document.addEventListener('mousemove', function(e) {
+            if (!honeycombBg) return;
+            honeycombBg.style.setProperty('--mouse-x', `${e.clientX}px`);
+            honeycombBg.style.setProperty('--mouse-y', `${e.clientY}px`);
+        }, { passive: true });
+
+        window.addEventListener('load', function() {
+            if (!honeycombBg) return;
+            honeycombBg.style.setProperty('--mouse-x', `${window.innerWidth / 2}px`);
+            honeycombBg.style.setProperty('--mouse-y', `${window.innerHeight / 2}px`);
+        });
+
+        // DYNAMIC AUDIO PLAYLIST
+        const audioTrack = document.getElementById('main-audio-stream');
+        const playBtn = document.getElementById('stream-play-trigger');
+        const playIcon = document.getElementById('stream-play-icon');
+        const prevBtn = document.getElementById('stream-prev-btn');
+        const nextBtn = document.getElementById('stream-next-btn');
+        const progressSlider = document.getElementById('stream-progress-slider');
+        const currentTimeText = document.getElementById('stream-current-time');
+        const totalDurationText = document.getElementById('stream-total-duration');
+        const visualizerNode = document.getElementById('stream-visualizer-engine');
+        
+        const trackAvatar = document.getElementById('player-track-avatar');
+        const trackName = document.getElementById('player-track-name');
+        const albumTitle = document.getElementById('player-album-title');
+
+        // STATIC ASSETS SERVED VIA FLASK /static/
+        const playlist = [
+            { name: "Karan Aujla", album: "WAVY", file: "/static/audios/Wavy.mp3", img: "/static/images/KA wavy.jpg" },
+            { name: "Diljit Dosanjh", album: "Case", file: "/static/audios/case.mp3", img: "/static/images/DD case.jpg" },
+            { name: "AP Dhillon", album: "Excuses", file: "/static/audios/excuses.mp3", img: "/static/images/AP excuses.jpeg" },
+            { name: "Ashish Bhatia", album: "Kashish", file: "/static/audios/kashish.mp3", img: "/static/images/AB kashish.jpeg" }
+        ];
+        let currentTrackIndex = 0;
+
+        const catTrack = document.getElementById('cat-slider-track');
+        const catNextBtn = document.getElementById('cat-slide-next-trigger');
+
+        if (catTrack && catNextBtn) {
+            catNextBtn.addEventListener('click', function() {
+                const cardWidth = catTrack.querySelector('.premium-cat-btn').offsetWidth;
+                const totalScrollJump = (cardWidth + 16) * 2; 
+
+                if (catTrack.scrollLeft + catTrack.offsetWidth >= catTrack.scrollWidth - 10) {
+                    catTrack.scrollTo({ left: 0, behavior: 'smooth' });
+                } else {
+                    catTrack.scrollBy({ left: totalScrollJump, behavior: 'smooth' });
+                }
+            });
+        }
+
+        function formatTimeStrings(seconds) {
+            if (isNaN(seconds) || seconds === Infinity) return "00:00";
+            const mins = Math.floor(seconds / 60);
+            const secs = Math.floor(seconds % 60);
+            return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+        }
+
+        function loadTrackData(index) {
+            const track = playlist[index];
+            audioTrack.src = track.file;
+            audioTrack.load();
+            
+            if (trackName) trackName.textContent = track.name;
+            if (albumTitle) albumTitle.textContent = track.album;
+            if (trackAvatar) trackAvatar.src = track.img;
+            
+            progressSlider.value = 0;
+            currentTimeText.textContent = "00:00";
+            totalDurationText.textContent = "00:00";
+            progressSlider.style.background = `rgba(255,255,255,0.08)`;
+        }
+
+        function toggleAudioPlayback() {
+            if (audioTrack.paused) {
+                audioTrack.play();
+                playIcon.className = "fa-solid fa-pause";
+                if (visualizerNode) {
+                    visualizerNode.querySelectorAll('.bar-line-anim').forEach(bar => bar.style.animationPlayState = 'running');
+                }
+            } else {
+                audioTrack.pause();
+                playIcon.className = "fa-solid fa-play";
+                if (visualizerNode) {
+                    visualizerNode.querySelectorAll('.bar-line-anim').forEach(bar => bar.style.animationPlayState = 'paused');
+                }
+            }
+        }
+
+        function changeTrack(direction) {
+            const wasPlaying = !audioTrack.paused;
+            if (direction === 'next') {
+                currentTrackIndex = (currentTrackIndex + 1) % playlist.length;
+            } else {
+                currentTrackIndex = (currentTrackIndex - 1 + playlist.length) % playlist.length;
+            }
+            loadTrackData(currentTrackIndex);
+            if (wasPlaying) {
+                audioTrack.play();
+                playIcon.className = "fa-solid fa-pause";
+                if (visualizerNode) visualizerNode.querySelectorAll('.bar-line-anim').forEach(bar => bar.style.animationPlayState = 'running');
+            } else {
+                playIcon.className = "fa-solid fa-play";
+                if (visualizerNode) visualizerNode.querySelectorAll('.bar-line-anim').forEach(bar => bar.style.animationPlayState = 'paused');
+            }
+        }
+
+        if (visualizerNode) {
+            visualizerNode.querySelectorAll('.bar-line-anim').forEach(bar => bar.style.animationPlayState = 'paused');
+        }
+
+        if (playBtn && audioTrack) {
+            playBtn.addEventListener('click', toggleAudioPlayback);
+            if (nextBtn) nextBtn.addEventListener('click', () => changeTrack('next'));
+            if (prevBtn) prevBtn.addEventListener('click', () => changeTrack('prev'));
+
+            audioTrack.addEventListener('loadedmetadata', () => {
+                totalDurationText.textContent = formatTimeStrings(audioTrack.duration);
+            });
+
+            audioTrack.addEventListener('timeupdate', () => {
+                if (!audioTrack.duration) return;
+                const currentPercentage = (audioTrack.currentTime / audioTrack.duration) * 100;
+                progressSlider.value = currentPercentage;
+                currentTimeText.textContent = formatTimeStrings(audioTrack.currentTime);
+                progressSlider.style.background = `linear-gradient(90deg, #ff007f ${currentPercentage}%, rgba(255,255,255,0.08) ${currentPercentage}%)`;
+            });
+
+            progressSlider.addEventListener('input', () => {
+                const targetTime = (progressSlider.value / 100) * audioTrack.duration;
+                currentTimeText.textContent = formatTimeStrings(targetTime);
+            });
+
+            progressSlider.addEventListener('change', () => {
+                audioTrack.currentTime = (progressSlider.value / 100) * audioTrack.duration;
+            });
+
+            audioTrack.addEventListener('ended', () => {
+                changeTrack('next');
+                audioTrack.play();
+                playIcon.className = "fa-solid fa-pause";
+                if (visualizerNode) visualizerNode.querySelectorAll('.bar-line-anim').forEach(bar => bar.style.animationPlayState = 'running');
+            });
+        }
+
+        // NAVBAR LOGGED-IN/LOGGED-OUT SWITCHER
+        window.addEventListener('DOMContentLoaded', () => {
+            const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
+
+            const loggedOutNav = document.getElementById('nav-actions-logged-out');
+            const loggedInNav = document.getElementById('nav-actions-logged-in');
+
+            if (isLoggedIn) {
+                if (loggedOutNav) loggedOutNav.style.display = 'none';
+                if (loggedInNav) loggedInNav.style.display = 'flex';
+            } else {
+                if (loggedOutNav) loggedOutNav.style.display = 'flex';
+                if (loggedInNav) loggedInNav.style.display = 'none';
+            }
+        });
+    </script>
+</body>
+</html>
