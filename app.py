@@ -5,6 +5,7 @@ import smtplib
 import random
 import time
 import base64
+import requests 
 from werkzeug.utils import secure_filename
 from datetime import datetime
 from functools import wraps
@@ -331,35 +332,38 @@ def get_venue_approval_email_template(fullname, venue_name, booking_date, shift_
     </div>
     """
 def send_email_direct(to_email, subject, html_content):
-    """Direct synchronous SMTP sender with cloud fallback"""
-    clean_sender = (SENDER_EMAIL or "").strip()
-    clean_password = (SENDER_PASSWORD or "").replace(" ", "").strip()
+    """Sends email via Brevo REST API over HTTPS (Port 443 - works on Render)"""
+    api_key = os.getenv("BREVO_API_KEY")
+    sender_email = os.getenv("SENDER_EMAIL")
 
-    if not clean_sender or not clean_password:
-        print("⚠️ [EMAIL NOTICE] SENDER_EMAIL or SENDER_PASSWORD is not set.")
-        return True, "Skipped (Credentials missing)"
+    if not api_key or not sender_email:
+        print("❌ [BREVO ERROR] Missing BREVO_API_KEY or SENDER_EMAIL.")
+        return False, "Email configuration missing."
+
+    url = "https://api.brevo.com/v3/smtp/email"
+    headers = {
+        "accept": "application/json",
+        "api-key": api_key,
+        "content-type": "application/json",
+    }
+    payload = {
+        "sender": {"name": "Evora Live", "email": sender_email},
+        "to": [{"email": to_email}],
+        "subject": subject,
+        "htmlContent": html_content,
+    }
 
     try:
-        msg = MIMEMultipart("alternative")
-        msg["From"] = f"Evora Live <{clean_sender}>"
-        msg["To"] = to_email
-        msg["Subject"] = subject
-        msg.attach(MIMEText(html_content, "html"))
-
-        with smtplib.SMTP_SSL("smtp.gmail.com", 465, timeout=5) as server:
-            server.login(clean_sender, clean_password)
-            server.sendmail(clean_sender, to_email, msg.as_string())
-
-        print(f"✅ [EMAIL SENT] Successfully delivered to {to_email}")
-        return True, "Success"
-
+        response = requests.post(url, json=payload, headers=headers, timeout=10)
+        if response.status_code in [200, 201, 202]:
+            print(f"✅ [EMAIL SENT] Successfully delivered to {to_email}")
+            return True, "Success"
+        else:
+            print(f"❌ [BREVO API ERROR] {response.status_code}: {response.text}")
+            return False, f"Brevo API error: {response.status_code}"
     except Exception as e:
-        print(f"⚠️ [SMTP BLOCKED/FAILED] Cloud network blocked SMTP connection: {e}")
-        print(
-            f"ℹ️ [BYPASS] Allowing workflow to continue for {to_email} without"
-            " crashing."
-        )
-        return True, "Success"
+        print(f"❌ [NETWORK ERROR] {e}")
+        return False, str(e)
 
 
 # ==========================================================================
