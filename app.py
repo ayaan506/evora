@@ -200,69 +200,44 @@ def get_otp_email_template(fullname, otp_code):
     </div>
     """
 
-def get_welcome_email_template(fullname, user_email):
+def get_welcome_email_html(user_name):
     return f"""
-    <div style="font-family: 'Segoe UI', Arial, sans-serif; background-color: #f8fafc; padding: 40px 15px; color: #0f172a; line-height: 1.6;">
-        <div style="max-width: 600px; margin: 0 auto; background: #ffffff; border-radius: 20px; border: 1px solid #e2e8f0; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.04);">
-            <div style="background: linear-gradient(135deg, #7c3aed, #db2777); padding: 36px 30px; text-align: center; color: #ffffff;">
-                <h1 style="font-size: 32px; font-weight: 800; margin: 0; letter-spacing: -0.5px;">evora</h1>
-                <p style="font-size: 14px; opacity: 0.9; margin: 6px 0 0 0; text-transform: uppercase; letter-spacing: 1px;">Live Events • Premium Venues • Production Ops</p>
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="utf-8">
+        <style>
+            body {{ font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #0f172a; color: #f8fafc; margin: 0; padding: 20px; }}
+            .container {{ max-width: 600px; margin: 0 auto; background-color: #1e293b; border-radius: 12px; overflow: hidden; border: 1px solid #334155; }}
+            .header {{ background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%); padding: 30px 20px; text-align: center; }}
+            .header h1 {{ margin: 0; color: #ffffff; font-size: 28px; letter-spacing: 1px; }}
+            .content {{ padding: 30px; line-height: 1.6; color: #cbd5e1; }}
+            .content h2 {{ color: #ffffff; margin-top: 0; }}
+            .btn-container {{ text-align: center; margin: 30px 0; }}
+            .btn {{ background: #6366f1; color: #ffffff; padding: 12px 28px; text-decoration: none; border-radius: 8px; font-weight: bold; display: inline-block; }}
+            .footer {{ background-color: #0f172a; padding: 20px; text-align: center; font-size: 12px; color: #64748b; }}
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <div class="header">
+                <h1>EVORA LIVE</h1>
             </div>
-            <div style="padding: 36px 32px;">
-                <h2 style="font-size: 22px; font-weight: 700; color: #0f172a; margin: 0 0 12px 0;">Welcome to Evora, {fullname}! 🎉</h2>
-                <p style="font-size: 14px; color: #475569; margin: 0 0 24px 0;">
-                    Your account (<code>{user_email}</code>) has been successfully verified. You now have full access to our complete entertainment and event operations ecosystem.
-                </p>
-                <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 14px; padding: 22px; margin-bottom: 28px;">
-                    <h3 style="font-size: 15px; font-weight: 700; color: #7c3aed; margin: 0 0 14px 0; text-transform: uppercase; letter-spacing: 0.5px;">
-                        ✨ What You Can Do With Evora
-                    </h3>
-                    <div style="margin-bottom: 12px;">
-                        <strong style="color: #0f172a; font-size: 14px;">🎫 Live Concert Passes & Festivals:</strong>
-                        <p style="font-size: 13px; color: #64748b; margin: 2px 0 0 0;">Book verified tickets, VIP lounges, and arena passes with instant digital QR pass generation.</p>
-                    </div>
-                    <div style="margin-bottom: 12px;">
-                        <strong style="color: #0f172a; font-size: 14px;">🏛️ Premium Venue Booking:</strong>
-                        <p style="font-size: 13px; color: #64748b; margin: 2px 0 0 0;">Reserve luxury banquet halls, open-air amphitheatres, and rooftop arenas with live calendar shift locks.</p>
-                    </div>
-                    <div style="margin-bottom: 12px;">
-                        <strong style="color: #0f172a; font-size: 14px;">👥 Event Crew & Manpower:</strong>
-                        <p style="font-size: 13px; color: #64748b; margin: 2px 0 0 0;">Hire certified bouncers, hospitality ushers, stage managers, and technical sound engineers on demand.</p>
-                    </div>
-                    <div>
-                        <strong style="color: #0f172a; font-size: 14px;">📑 Comprehensive Event Planner:</strong>
-                        <p style="font-size: 13px; color: #64748b; margin: 2px 0 0 0;">Build custom corporate galas, weddings, and concerts with transparent budget calculators.</p>
-                    </div>
+            <div class="content">
+                <h2>Welcome to Evora, {user_name}! 🎉</h2>
+                <p>Your account has been successfully verified and activated.</p>
+                <p>You're all set to discover live concerts, book exclusive passes, manage event logistics, and access your automated QR tickets anywhere.</p>
+                <div class="btn-container">
+                    <a href="https://evora-0m5i.onrender.com/login" class="btn">Explore Events Now</a>
                 </div>
-                <div style="text-align: center; margin: 30px 0;">
-                    <a href="http://127.0.0.1:5000/events" style="display: inline-block; background: linear-gradient(135deg, #7c3aed, #db2777); color: #ffffff; text-decoration: none; font-weight: 600; font-size: 14px; padding: 14px 28px; border-radius: 10px; box-shadow: 0 4px 15px rgba(124, 58, 237, 0.25);">
-                        Explore Live Concerts & Events →
-                    </a>
-                </div>
-                <div style="border-top: 1px solid #e2e8f0; padding-top: 24px; margin-top: 24px;">
-                    <h4 style="font-size: 14px; font-weight: 700; color: #0f172a; margin: 0 0 8px 0;">Need Assistance or Custom Bookings?</h4>
-                    <p style="font-size: 13px; color: #64748b; margin: 0 0 12px 0;">Our executive operations desk is available 24/7 for custom event consultations:</p>
-                    <table style="width: 100%; font-size: 13px; color: #334155;">
-                        <tr>
-                            <td style="padding: 4px 0; width: 110px;"><strong>📞 Phone / Desk:</strong></td>
-                            <td style="padding: 4px 0;"><a href="tel:+917219899114" style="color: #7c3aed; text-decoration: none; font-weight: 600;">+91 7219899114</a></td>
-                        </tr>
-                        <tr>
-                            <td style="padding: 4px 0;"><strong>✉️ Email Desk:</strong></td>
-                            <td style="padding: 4px 0;"><a href="mailto:support@evora.live" style="color: #7c3aed; text-decoration: none; font-weight: 600;">support@evora.live</a></td>
-                        </tr>
-                        <tr>
-                            <td style="padding: 4px 0;"><strong>📍 Headquarters:</strong></td>
-                            <td style="padding: 4px 0; color: #64748b;">Evora Live Ops, Pune, Maharashtra, India</td>
-                        </tr>
-                    </table>
-                </div>
+                <p>If you have any questions or need support, reply directly to this email.</p>
             </div>
-            <div style="background: #f1f5f9; padding: 18px 30px; text-align: center; font-size: 11px; color: #94a3b8; border-top: 1px solid #e2e8f0;">
-                © 2026 Evora Live Event Operations Pvt Ltd. All rights reserved.
+            <div class="footer">
+                &copy; 2026 Evora Platform. All rights reserved.
             </div>
         </div>
-    </div>
+    </body>
+    </html>
     """
 
 def get_venue_approval_email_template(fullname, venue_name, booking_date, shift_type, total_price, booking_ref):
