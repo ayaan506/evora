@@ -1330,6 +1330,45 @@ def admin_clear_login_logs():
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 500
 
+@app.route('/api/admin/users/delete', methods=['POST'])
+def admin_delete_user():
+    # Enforce admin authorization
+    if not session.get('is_admin'):
+        return jsonify({'status': 'error', 'message': 'Unauthorized. Admin access required.'}), 403
+
+    data = request.get_json(silent=True) or {}
+    target_email = data.get('email', '').strip().lower()
+
+    if not target_email:
+        return jsonify({'status': 'error', 'message': 'Target email is required.'}), 400
+
+    # Prevent admin from accidentally deleting themselves
+    if target_email == session.get('user_email'):
+        return jsonify({'status': 'error', 'message': 'You cannot delete your own admin account.'}), 400
+
+    conn = sqlite3.connect(DB_FILE)
+    cursor = conn.cursor()
+
+    try:
+        # Check if user exists
+        cursor.execute("SELECT id FROM users WHERE email = ?", (target_email,))
+        user_row = cursor.fetchone()
+        if not user_row:
+            conn.close()
+            return jsonify({'status': 'error', 'message': 'User not found.'}), 404
+
+        # Delete user credentials and associated OTP session records
+        cursor.execute("DELETE FROM users WHERE email = ?", (target_email,))
+        cursor.execute("DELETE FROM otp_codes WHERE email = ?", (target_email,))
+        conn.commit()
+        conn.close()
+
+        print(f"🗑️ [ADMIN ACTION] User account deleted: {target_email}")
+        return jsonify({'status': 'success', 'message': f'Account {target_email} successfully removed.'}), 200
+
+    except Exception as e:
+        conn.close()
+        return jsonify({'status': 'error', 'message': str(e)}), 500
 
 # ==========================================================================
 # SERVER RUNNER
