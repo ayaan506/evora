@@ -270,6 +270,25 @@
             background: #047857;
         }
 
+        .btn-action-delete-user {
+            background: #fee2e2;
+            color: #dc2626;
+            border: 1px solid #fca5a5;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            transition: all 0.15s ease;
+        }
+        .btn-action-delete-user:hover {
+            background: #dc2626;
+            color: #ffffff;
+        }
+
         /* MODAL */
         .modal-overlay {
             position: fixed;
@@ -289,6 +308,19 @@
             max-width: 520px;
             padding: 24px;
             box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+        }
+
+        .btn-pay-submit {
+            background: #7c3aed;
+            color: #ffffff;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s ease;
+        }
+        .btn-pay-submit:hover {
+            background: #6d28d9;
         }
 
         @media (max-width: 1024px) {
@@ -334,25 +366,8 @@
                 <i class="fa-solid fa-shield-halved"></i> Live Logged-In Users & Audit Stream
             </button>
         </div>
-<!-- In Section 1 (Bookings Toolbar) -->
-<div class="table-header-toolbar">
-    <div class="filter-btn-group">
-        <button class="filter-btn active" onclick="filterTable('all', this)">All Bookings (<span id="count-all">0</span>)</button>
-        <button class="filter-btn" onclick="filterTable('passes', this)">Passes</button>
-        <button class="filter-btn" onclick="filterTable('manpower', this)">Manpower</button>
-        <button class="filter-btn" onclick="filterTable('venues', this)">Venues</button>
-    </div>
 
-    <div style="display:flex; gap:10px; align-items:center;">
-        <div class="search-box">
-            <i class="fa-solid fa-magnifying-glass"></i>
-            <input type="text" id="admin-search-input" placeholder="Search by customer, title, or ref ID..." onkeyup="searchTable()">
-        </div>
-        <button onclick="clearAllBookings()" style="background:#fee2e2; color:#dc2626; border:1px solid #fca5a5; padding:8px 14px; border-radius:8px; font-weight:700; font-size:12px; cursor:pointer;">
-            <i class="fa-solid fa-trash-can"></i> Clear All Bookings
-        </button>
-    </div>
-</div>
+        <!-- SECTION 1: BOOKINGS -->
         <div id="section-bookings">
             <div class="kpi-grid">
                 <div class="kpi-card">
@@ -397,9 +412,14 @@
                         <button class="filter-btn" onclick="filterTable('venues', this)">Venues</button>
                     </div>
 
-                    <div class="search-box">
-                        <i class="fa-solid fa-magnifying-glass"></i>
-                        <input type="text" id="admin-search-input" placeholder="Search by customer, title, or ref ID..." onkeyup="searchTable()">
+                    <div style="display:flex; gap:10px; align-items:center;">
+                        <div class="search-box">
+                            <i class="fa-solid fa-magnifying-glass"></i>
+                            <input type="text" id="admin-search-input" placeholder="Search by customer, title, or ref ID..." onkeyup="searchTable()">
+                        </div>
+                        <button onclick="clearAllBookings()" style="background:#fee2e2; color:#dc2626; border:1px solid #fca5a5; padding:8px 14px; border-radius:8px; font-weight:700; font-size:12px; cursor:pointer;">
+                            <i class="fa-solid fa-trash-can"></i> Clear All Bookings
+                        </button>
                     </div>
                 </div>
 
@@ -423,6 +443,7 @@
             </div>
         </div>
 
+        <!-- SECTION 2: USERS DIRECTORY -->
         <div id="section-users" style="display: none;">
             <div class="table-card">
                 <div class="table-header-toolbar">
@@ -441,15 +462,17 @@
                             <th>Phone Number</th>
                             <th>Role</th>
                             <th>Joined Date</th>
+                            <th>Actions</th>
                         </tr>
                     </thead>
                     <tbody id="admin-users-table-body">
-                        <tr><td colspan="6" style="text-align:center; padding:30px; color:#94a3b8;">Loading users...</td></tr>
+                        <tr><td colspan="7" style="text-align:center; padding:30px; color:#94a3b8;">Loading users...</td></tr>
                     </tbody>
                 </table>
             </div>
         </div>
 
+        <!-- SECTION 3: AUDIT & LOGIN LOGS -->
         <div id="section-logs" style="display: none;">
             <div class="table-card">
                 <div class="table-header-toolbar">
@@ -457,6 +480,9 @@
                         <h3 style="margin: 0; font-size: 16px; font-weight: 700;">Live Logged-In Users & Audit Stream</h3>
                         <p style="margin: 2px 0 0 0; font-size: 12px; color: #64748b;">Real-time timestamps, emails, and IPs of users logging in</p>
                     </div>
+                    <button onclick="clearAllLogs()" style="background:#fee2e2; color:#dc2626; border:1px solid #fca5a5; padding:8px 14px; border-radius:8px; font-weight:700; font-size:12px; cursor:pointer;">
+                        <i class="fa-solid fa-trash-can"></i> Clear Login Logs
+                    </button>
                 </div>
 
                 <table class="admin-table">
@@ -479,6 +505,7 @@
 
     </main>
 
+    <!-- ALLOCATION MODAL -->
     <div class="modal-overlay" id="allocation-modal">
         <div class="modal-card">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px;">
@@ -513,11 +540,6 @@
             <button class="btn-pay-submit" onclick="submitAllocationUpdate()" style="width: 100%; padding: 12px; font-size: 14px;">Save & Dispatch Update</button>
         </div>
     </div>
-    <button 
-  onclick="removeUserAccount('{{ user.email }}')" 
-  class="px-3 py-1.5 bg-red-600/20 hover:bg-red-600 text-red-400 hover:text-white rounded-lg text-xs font-semibold border border-red-500/30 transition duration-150">
-  Remove Account
-</button>
 
     <script>
         let allBookingsData = [];
@@ -571,17 +593,25 @@
                     const usersTbody = document.getElementById('admin-users-table-body');
                     usersTbody.innerHTML = '';
                     if (!data.users || data.users.length === 0) {
-                        usersTbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:30px; color:#94a3b8;">No registered users found in database.</td></tr>`;
+                        usersTbody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding:30px; color:#94a3b8;">No registered users found in database.</td></tr>`;
                     } else {
                         data.users.forEach(u => {
+                            const escapedEmail = (u.email || '').replace(/'/g, "\\'");
                             usersTbody.innerHTML += `
                                 <tr>
                                     <td><strong style="color:#7c3aed;">#${u.id}</strong></td>
                                     <td><strong>${u.fullname}</strong></td>
                                     <td>${u.email}</td>
                                     <td>${u.phone || 'N/A'}</td>
-                                    <td><span class="status-chip ${u.role === 'admin' ? 'status-completed' : 'status-confirmed'}">${u.role.toUpperCase()}</span></td>
+                                    <td><span class="status-chip ${u.role === 'admin' ? 'status-completed' : 'status-confirmed'}">${(u.role || 'customer').toUpperCase()}</span></td>
                                     <td>${u.created_at || 'Recent'}</td>
+                                    <td>
+                                        <button 
+                                            onclick="removeUserAccount('${escapedEmail}')" 
+                                            class="btn-action-delete-user">
+                                            <i class="fa-solid fa-user-xmark"></i> Remove
+                                        </button>
+                                    </td>
                                 </tr>
                             `;
                         });
@@ -609,6 +639,34 @@
                 }
             } catch (err) {
                 console.error("Admin user/logs fetch error:", err);
+            }
+        }
+
+        async function removeUserAccount(userEmail) {
+            const confirmed = confirm(`Are you sure you want to permanently delete account: ${userEmail}?\nThey will have to sign up again.`);
+            if (!confirmed) return;
+
+            try {
+                const res = await fetch('/api/admin/users/delete', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    credentials: 'include',
+                    body: JSON.stringify({ email: userEmail })
+                });
+
+                const data = await res.json();
+
+                if (res.ok && data.status === 'success') {
+                    alert(data.message);
+                    loadAdminUsersAndLogs();
+                } else {
+                    alert(data.message || 'Failed to remove account.');
+                }
+            } catch (err) {
+                console.error(err);
+                alert('An error occurred while deleting the account.');
             }
         }
 
@@ -659,61 +717,33 @@
 
                 let iconType = b.type === 'manpower' ? 'fa-user-tie' : (b.type === 'venues' ? 'fa-building' : 'fa-ticket');
 
-                // Dynamic actions: 1-click Approve for pending venues, or general Manage modal
-         // In renderTableRows():
-let actionBtnHTML = '';
-if (b.type === 'venues' && b.status === 'PENDING_APPROVAL') {
-    actionBtnHTML = `
-        <div style="display:flex; gap:6px; align-items:center;">
-            <button class="btn-action-approve" onclick="approveVenueDirect(${b.id}, '${b.title.replace(/'/g, "\\'")}', '${b.customer_name.replace(/'/g, "\\'")}')">
-                <i class="fa-solid fa-check"></i> Approve
-            </button>
-            <button class="btn-action-manage" onclick="openAllocationModal(${b.id}, '${b.ref}', '${b.title.replace(/'/g, "\\'")}', '${b.status}')">
-                <i class="fa-solid fa-sliders"></i>
-            </button>
-            <button onclick="deleteSingleBooking(${b.id}, '${b.ref}')" title="Delete Booking" style="background:#fef2f2; color:#ef4444; border:1px solid #fecaca; padding:6px 10px; border-radius:6px; cursor:pointer;">
-                <i class="fa-solid fa-trash"></i>
-            </button>
-        </div>
-    `;
-} else {
-    actionBtnHTML = `
-        <div style="display:flex; gap:6px; align-items:center;">
-            <button class="btn-action-manage" onclick="openAllocationModal(${b.id}, '${b.ref}', '${b.title.replace(/'/g, "\\'")}', '${b.status}')">
-                <i class="fa-solid fa-sliders"></i> Manage
-            </button>
-            <button onclick="deleteSingleBooking(${b.id}, '${b.ref}')" title="Delete Booking" style="background:#fef2f2; color:#ef4444; border:1px solid #fecaca; padding:6px 10px; border-radius:6px; cursor:pointer;">
-                <i class="fa-solid fa-trash"></i>
-            </button>
-        </div>
-    `;
-}
-async function removeUserAccount(userEmail) {
-  const confirmed = confirm(`Are you sure you want to permanently delete account: ${userEmail}?\nThey will have to sign up again.`);
-  if (!confirmed) return;
-
-  try {
-    const res = await fetch('/api/admin/users/delete', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({ email: userEmail })
-    });
-
-    const data = await res.json();
-
-    if (res.ok && data.status === 'success') {
-      alert(data.message);
-      window.location.reload(); // Refresh to update list
-    } else {
-      alert(data.message || 'Failed to remove account.');
-    }
-  } catch (err) {
-    console.error(err);
-    alert('An error occurred while deleting the account.');
-  }
-}
+                let actionBtnHTML = '';
+                if (b.type === 'venues' && b.status === 'PENDING_APPROVAL') {
+                    actionBtnHTML = `
+                        <div style="display:flex; gap:6px; align-items:center;">
+                            <button class="btn-action-approve" onclick="approveVenueDirect(${b.id}, '${b.title.replace(/'/g, "\\'")}', '${b.customer_name.replace(/'/g, "\\'")}')">
+                                <i class="fa-solid fa-check"></i> Approve
+                            </button>
+                            <button class="btn-action-manage" onclick="openAllocationModal(${b.id}, '${b.ref}', '${b.title.replace(/'/g, "\\'")}', '${b.status}')">
+                                <i class="fa-solid fa-sliders"></i>
+                            </button>
+                            <button onclick="deleteSingleBooking(${b.id}, '${b.ref}')" title="Delete Booking" style="background:#fef2f2; color:#ef4444; border:1px solid #fecaca; padding:6px 10px; border-radius:6px; cursor:pointer;">
+                                <i class="fa-solid fa-trash"></i>
+                            </button>
+                        </div>
+                    `;
+                } else {
+                    actionBtnHTML = `
+                        <div style="display:flex; gap:6px; align-items:center;">
+                            <button class="btn-action-manage" onclick="openAllocationModal(${b.id}, '${b.ref}', '${b.title.replace(/'/g, "\\'")}', '${b.status}')">
+                                <i class="fa-solid fa-sliders"></i> Manage
+                            </button>
+                            <button onclick="deleteSingleBooking(${b.id}, '${b.ref}')" title="Delete Booking" style="background:#fef2f2; color:#ef4444; border:1px solid #fecaca; padding:6px 10px; border-radius:6px; cursor:pointer;">
+                                <i class="fa-solid fa-trash"></i>
+                            </button>
+                        </div>
+                    `;
+                }
 
                 tbody.innerHTML += `
                     <tr>
@@ -772,7 +802,6 @@ async function removeUserAccount(userEmail) {
             document.getElementById('allocation-modal').classList.remove('active');
         }
 
-        // Delete a single booking/transaction
         async function deleteSingleBooking(bookingId, ref) {
             if (!confirm(`Are you sure you want to permanently delete transaction #${ref} from the pipeline?`)) return;
 
@@ -793,7 +822,6 @@ async function removeUserAccount(userEmail) {
             }
         }
 
-        // Clear all bookings from pipeline
         async function clearAllBookings() {
             const confirmation = prompt("⚠️ WARNING: This will delete ALL bookings and reset gross revenue to ₹0.\n\nType 'DELETE' to confirm:");
             if (confirmation !== 'DELETE') {
@@ -819,7 +847,6 @@ async function removeUserAccount(userEmail) {
             }
         }
 
-        // Clear user login audit logs
         async function clearAllLogs() {
             if (!confirm("Are you sure you want to clear the entire login audit history?")) return;
 
@@ -839,6 +866,7 @@ async function removeUserAccount(userEmail) {
                 alert("Server error occurred while clearing logs.");
             }
         }
+
         async function submitAllocationUpdate() {
             const bookingId = document.getElementById('modal-booking-id').value;
             const newStatus = document.getElementById('modal-status-select').value;
