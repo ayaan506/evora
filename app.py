@@ -396,10 +396,18 @@ def signup_page(): return render_template('signup.html')
 
 @app.route('/login')
 def login_page(): return render_template('login.html')
-
 @app.route('/admin')
 @admin_required
-def admin_page(): return render_template('admin.html')
+def admin_page():
+  conn = sqlite3.connect(DB_FILE)
+  conn.row_factory = sqlite3.Row
+  cursor = conn.cursor()
+  cursor.execute(
+      'SELECT id, fullname, email, phone, role FROM users ORDER BY id DESC'
+  )
+  users = cursor.fetchall()
+  conn.close()
+  return render_template('admin.html', users=users)
 
 
 # ==========================================================================
