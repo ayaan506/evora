@@ -830,6 +830,84 @@
                 if (loggedInNav) loggedInNav.style.display = 'none';
             }
         });
+        (function initEvoraCinematicLoader() {
+    const loader = document.getElementById('evora-cinematic-loader');
+    const fill = document.getElementById('loaderFill');
+    const counter = document.getElementById('loaderCounter');
+    const canvas = document.getElementById('loader-particles-canvas');
+    if (!loader || !canvas) return;
+
+    // --- 1. PARTICLE ENGINE ---
+    const ctx = canvas.getContext('2d');
+    let width = canvas.width = window.innerWidth;
+    let height = canvas.height = window.innerHeight;
+
+    window.addEventListener('resize', () => {
+      width = canvas.width = window.innerWidth;
+      height = canvas.height = window.innerHeight;
+    });
+
+    const particles = Array.from({ length: 45 }, () => ({
+      x: width / 2 + (Math.random() - 0.5) * 80,
+      y: height / 2 + (Math.random() - 0.5) * 80,
+      vx: (Math.random() - 0.5) * 1.5,
+      vy: (Math.random() - 0.5) * 1.5 - 0.4,
+      radius: Math.random() * 2 + 1,
+      color: Math.random() > 0.5 ? '#a855f7' : '#ec4899',
+      alpha: Math.random() * 0.8 + 0.2
+    }));
+
+    let animId;
+    function renderParticles() {
+      ctx.clearRect(0, 0, width, height);
+      particles.forEach(p => {
+        p.x += p.vx;
+        p.y += p.vy;
+        p.alpha -= 0.002;
+        if (p.alpha <= 0 || p.x < 0 || p.x > width || p.y < 0) {
+          p.x = width / 2 + (Math.random() - 0.5) * 60;
+          p.y = height / 2 + (Math.random() - 0.5) * 60;
+          p.alpha = Math.random() * 0.8 + 0.2;
+        }
+        ctx.save();
+        ctx.globalAlpha = p.alpha;
+        ctx.fillStyle = p.color;
+        ctx.shadowBlur = 10;
+        ctx.shadowColor = p.color;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+        ctx.fill;
+        ctx.restore();
+      });
+      animId = requestAnimationFrame(renderParticles);
+    }
+    renderParticles();
+
+    // --- 2. EXTENDED CINEMATIC PROGRESS RUNNER (~3.5 SECONDS) ---
+    let progress = 0;
+    
+    // Increments smoothly by 1-2% every 35ms (~3 seconds to reach 100%)
+    const interval = setInterval(() => {
+      progress += Math.floor(Math.random() * 2) + 1;
+      
+      if (progress >= 100) {
+        progress = 100;
+        clearInterval(interval);
+        fill.style.width = '100%';
+        counter.innerText = '100%';
+
+        // Hold for 700ms at 100% so the completed state is visible before fade-out
+        setTimeout(() => {
+          loader.classList.add('loader-finished');
+          cancelAnimationFrame(animId);
+          setTimeout(() => loader.remove(), 900);
+        }, 700);
+      } else {
+        fill.style.width = `${progress}%`;
+        counter.innerText = `${progress}%`;
+      }
+    }, 35);
+  })();
     </script>
 </body>
 </html>
