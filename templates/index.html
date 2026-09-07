@@ -16,7 +16,43 @@
     <script src="/static/eventsData.js"></script>
 </head>
 <body>
+    <!-- CINEMATIC EVORA INTRO LOADER -->
+<div id="evora-cinematic-loader">
+  <canvas id="loader-particles-canvas"></canvas>
+  
+  <div class="loader-backdrop-grid"></div>
+  <div class="loader-ambient-glow"></div>
 
+  <div class="loader-core">
+    <!-- Brand Centerpiece -->
+    <div class="loader-emblem-wrap">
+      <div class="shockwave wave-1"></div>
+      <div class="shockwave wave-2"></div>
+      <div class="flare-sweep"></div>
+      <img src="{{ url_for('static', filename='images/E for evora.png') }}" alt="Evora Emblem" class="loader-emblem">
+    </div>
+
+    <!-- Animated Typography -->
+    <div class="loader-brand-title">
+      <span class="char" style="--d: 0.1s">E</span>
+      <span class="char" style="--d: 0.2s">V</span>
+      <span class="char" style="--d: 0.3s">O</span>
+      <span class="char" style="--d: 0.4s">R</span>
+      <span class="char" style="--d: 0.5s">A</span>
+    </div>
+    
+    <div class="loader-tagline">CONCERT TOURS • PASSES • EXPERIENCE</div>
+
+    <!-- Dynamic Neon Shimmer Track -->
+    <div class="loader-gauge-box">
+      <div class="loader-gauge-track">
+        <div class="loader-gauge-fill" id="loaderFill"></div>
+        <div class="loader-gauge-spark"></div>
+      </div>
+      <div class="loader-counter" id="loaderCounter">0%</div>
+    </div>
+  </div>
+</div>
     <!-- BACKGROUND GRAPHICS ENGINE -->
     <div class="honeycomb-background-engine" id="honeycomb-bg"></div>
 
