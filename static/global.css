@@ -872,6 +872,229 @@ body {
     font-size: 12px;
 }
 /* ==========================================================================
+   CINEMATIC EVORA ULTRA SPLASH PRELOADER
+   ========================================================================== */
+#evora-cinematic-loader {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  background: #05050b;
+  z-index: 999999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  perspective: 1000px;
+  transition: opacity 0.8s cubic-bezier(0.77, 0, 0.175, 1), transform 0.8s cubic-bezier(0.77, 0, 0.175, 1), filter 0.8s ease;
+}
+
+#evora-cinematic-loader.loader-finished {
+  opacity: 0;
+  transform: scale(1.12);
+  filter: blur(8px);
+  pointer-events: none;
+}
+
+#loader-particles-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* Perspective Cyber Grid Floor */
+.loader-backdrop-grid {
+  position: absolute;
+  bottom: -20%;
+  left: -50%;
+  width: 200%;
+  height: 80%;
+  background-image: 
+    linear-gradient(rgba(124, 58, 237, 0.18) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(124, 58, 237, 0.18) 1px, transparent 1px);
+  background-size: 45px 45px;
+  transform: rotateX(75deg);
+  mask-image: linear-gradient(to top, rgba(0,0,0,1) 10%, rgba(0,0,0,0) 80%);
+  -webkit-mask-image: linear-gradient(to top, rgba(0,0,0,1) 10%, rgba(0,0,0,0) 80%);
+  animation: gridMove 20s linear infinite;
+  z-index: 0;
+}
+
+@keyframes gridMove {
+  from { background-position: 0 0; }
+  to { background-position: 0 900px; }
+}
+
+.loader-ambient-glow {
+  position: absolute;
+  width: 450px;
+  height: 450px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(124, 58, 237, 0.35) 0%, rgba(219, 39, 119, 0.15) 45%, transparent 70%);
+  filter: blur(40px);
+  animation: ambientPulse 3s ease-in-out infinite alternate;
+  z-index: 1;
+}
+
+@keyframes ambientPulse {
+  0% { transform: scale(0.85); opacity: 0.6; }
+  100% { transform: scale(1.25); opacity: 1; }
+}
+
+/* Emblem & Center Stage */
+.loader-core {
+  position: relative;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.loader-emblem-wrap {
+  position: relative;
+  width: 100px;
+  height: 100px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 24px;
+}
+
+.loader-emblem {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  position: relative;
+  z-index: 4;
+  filter: drop-shadow(0 0 20px rgba(168, 85, 247, 0.85));
+  animation: emblemPop 1.2s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+@keyframes emblemPop {
+  0% { transform: scale(0.4) rotate(-15deg); opacity: 0; }
+  100% { transform: scale(1) rotate(0deg); opacity: 1; }
+}
+
+/* Expanding Shockwaves */
+.shockwave {
+  position: absolute;
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  border: 2px solid rgba(168, 85, 247, 0.8);
+  box-shadow: 0 0 15px rgba(219, 39, 119, 0.6);
+  opacity: 0;
+  z-index: 2;
+}
+
+.wave-1 { animation: waveBurst 2.2s cubic-bezier(0.1, 0.8, 0.3, 1) infinite; }
+.wave-2 { animation: waveBurst 2.2s cubic-bezier(0.1, 0.8, 0.3, 1) 0.7s infinite; }
+
+@keyframes waveBurst {
+  0% { transform: scale(0.6); opacity: 0.9; }
+  100% { transform: scale(2.8); opacity: 0; }
+}
+
+/* Lens Flare Sweep */
+.flare-sweep {
+  position: absolute;
+  width: 180px;
+  height: 3px;
+  background: linear-gradient(90deg, transparent, #ffffff, #c084fc, transparent);
+  filter: blur(1px);
+  transform: rotate(35deg);
+  opacity: 0;
+  animation: flareFlash 2.5s ease-in-out infinite;
+  z-index: 5;
+}
+
+@keyframes flareFlash {
+  0%, 40% { opacity: 0; transform: translateY(-50px) rotate(35deg); }
+  50% { opacity: 1; }
+  60%, 100% { opacity: 0; transform: translateY(50px) rotate(35deg); }
+}
+
+/* Staggered Typography */
+.loader-brand-title {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+
+.loader-brand-title .char {
+  color: #ffffff;
+  font-size: 32px;
+  font-weight: 900;
+  letter-spacing: 2px;
+  display: inline-block;
+  opacity: 0;
+  transform: translateY(15px);
+  animation: charDrop 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  animation-delay: var(--d);
+  text-shadow: 0 0 25px rgba(192, 132, 252, 0.8);
+}
+
+@keyframes charDrop {
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.loader-tagline {
+  color: #94a3b8;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  margin-bottom: 28px;
+  opacity: 0;
+  animation: fadeIn 0.8s ease forwards 0.6s;
+}
+
+@keyframes fadeIn {
+  to { opacity: 0.85; }
+}
+
+/* Futuristic Progress Gauge */
+.loader-gauge-box {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.loader-gauge-track {
+  width: 180px;
+  height: 4px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 999px;
+  position: relative;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.loader-gauge-fill {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, #6366f1, #a855f7, #ec4899);
+  box-shadow: 0 0 14px rgba(236, 72, 153, 0.9);
+  border-radius: 999px;
+  transition: width 0.05s linear;
+}
+
+.loader-counter {
+  font-size: 12px;
+  font-weight: 800;
+  color: #c084fc;
+  font-variant-numeric: tabular-nums;
+  width: 34px;
+  text-align: left;
+}
+/* ==========================================================================
    12. PREMIUM IMAGE-STYLE CATEGORY CARD SLIDER MATRIX
    ========================================================================== */
 .category-section {
