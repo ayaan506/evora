@@ -546,7 +546,58 @@ body {
     0% { height: 20%; }
     100% { height: 100%; }
 }
+Here are the exact files to update in your Evora project to apply the mobile performance fixes and cleanup.
 
+1. static/css/style.css (or your main CSS file)
+Add this block at the very bottom of your main CSS file. It fixes mobile touch delays, horizontal scroll bugs, and disables heavy background GPU blur effects on phones:
+
+CSS
+/* =====================================================
+   MOBILE PERFORMANCE OPTIMIZATIONS & GPU CLEANUP
+   ===================================================== */
+
+/* 1. Prevent horizontal overflow & eliminate 300ms mobile tap delay */
+html, body {
+  overflow-x: hidden !important;
+  -webkit-overflow-scrolling: touch;
+  text-rendering: optimizeLegibility;
+  -webkit-tap-highlight-color: transparent;
+}
+
+button, a, input, select, .btn {
+  touch-action: manipulation;
+}
+
+/* 2. Low-Power GPU Optimizations for Mobile Screens (< 768px) */
+@media (max-width: 768px) {
+  /* Reduce heavy backdrop blurs that cause frame drops */
+  .glass-card, 
+  .navbar, 
+  .hero-glass, 
+  .modal-content,
+  .event-card-inner {
+    backdrop-filter: blur(6px) !important;
+    -webkit-backdrop-filter: blur(6px) !important;
+  }
+
+  /* Disable expensive continuous CSS infinite animations */
+  .pulse-glow, 
+  .ambient-glow, 
+  .floating-element, 
+  .bg-glow-orb {
+    animation: none !important;
+    transform: none !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4) !important;
+  }
+
+  /* Contain paint/layout reflows on card grids */
+  .event-card, 
+  .venue-card, 
+  .booking-card {
+    contain: content;
+    will-change: transform;
+  }
+}
 /* 7b. COHESIVE GAP SHORTCUTS BAR ENGINE */
 .player-shortcuts-bar {
     display: grid;
