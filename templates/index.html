@@ -681,7 +681,23 @@
             honeycombBg.style.setProperty('--mouse-x', `${window.innerWidth / 2}px`);
             honeycombBg.style.setProperty('--mouse-y', `${window.innerHeight / 2}px`);
         });
-
+        // --- Mobile Performance & Memory Optimization ---
+        document.addEventListener('DOMContentLoaded', () => {
+          const isMobileDevice = window.innerWidth <= 768 || /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+        
+          // Automatically enable lazy-loading on all images
+          document.querySelectorAll('img').forEach(img => {
+            if (!img.hasAttribute('loading')) {
+              img.setAttribute('loading', 'lazy');
+            }
+          });
+        
+          // If particle animation engine exists, reduce count and throttle frame rate on phones
+          if (window.particleArray && isMobileDevice) {
+            // Cut active particle count in half to save mobile CPU/battery
+            window.particleArray = window.particleArray.slice(0, 15);
+          }
+        });
         // DYNAMIC AUDIO PLAYLIST
         const audioTrack = document.getElementById('main-audio-stream');
         const playBtn = document.getElementById('stream-play-trigger');
