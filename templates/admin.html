@@ -901,6 +901,22 @@
             sessionStorage.clear();
             window.location.href = "/logout";
         }
+            // Mobile DOM & Event Listener Cleanup
+  document.addEventListener('DOMContentLoaded', () => {
+    // Enable lazy-loading for dynamic event posters & venue photos
+    document.querySelectorAll('img').forEach(img => img.setAttribute('loading', 'lazy'));
+
+    // Clean up memory buffers when modals or checkout overlays close
+    document.querySelectorAll('.modal, .overlay-popup').forEach(modal => {
+      modal.addEventListener('hidden.bs.modal', () => {
+        const canvas = modal.querySelector('canvas');
+        if (canvas) {
+          const ctx = canvas.getContext('2d');
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+        }
+      });
+    });
+  });
 
         window.addEventListener('DOMContentLoaded', refreshAllAdminData);
     </script>
